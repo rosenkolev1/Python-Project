@@ -1,16 +1,24 @@
 from enum import Enum
 
 class Rank(Enum):
-    TWO = ["2", 1]
-    THREE = ["3", 2]
-    FOUR = ["4", 3]
-    FIVE = ["5", 4]
-    SIX = ["6", 5]
-    SEVEN = ["7", 6]
-    EIGHT = ["8", 7]
-    NINE = ["9", 8]
-    TEN = ["10", 9]
-    JACK = ["J", 10]
-    QUEEN = ["Q", 11]
-    KING = ["K", 12]
-    ACE = ["A", 13]
+    TWO = ["Two", 1]
+    THREE = ["Three", 2]
+    FOUR = ["Four", 3]
+    FIVE = ["Five", 4]
+    SIX = ["Six", 5]
+    SEVEN = ["Seven", 6]
+    EIGHT = ["Eight", 7]
+    NINE = ["Nine", 8]
+    TEN = ["Ten", 9]
+    JACK = ["Jack", 10]
+    QUEEN = ["Queen", 11]
+    KING = ["King", 12]
+    ACE = ["Ace", 13]
+
+    @property
+    def strength(self):
+        return self.value[1]
+
+    @property
+    def name(self):
+        return self.value[0]

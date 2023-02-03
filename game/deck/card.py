@@ -8,4 +8,4 @@ class Card:
         self.rank = rank
 
     def __repr__(self) -> str:
-        return self.suit.value + str(self.rank.value[0])
+        return self.suit.value + str(self.rank.name)

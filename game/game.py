@@ -162,21 +162,26 @@ class Game:
             player.best_hand = possible_hands_sorted[-1]
 
         #Order the players by their hand strengths
-        ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands))
+        ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
 
         # #Debug
         # for player in players_not_folded:
         #     print(f"Player:{player.user.name} has hand {player.best_hand}")
 
         #Debug
+        print(f"Community cards: {self.community_cards}\n")
+
         for player in ordered_players:
-            print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}")
+            print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n")
 
         #TODO: Add functionality for side pots
         winning_player: PotPlayer = ordered_players[-1]
         total_winnings = self.current_pot.total_money
         
         winning_player.user.money += total_winnings
+
+        #Debug
+        print(f"Player: {winning_player.user.name} has won the round and claimed {total_winnings}$ from the pot")          
 
     def get_possible_actions(self, player, pot) -> Tuple[List[PlayerActionType], float]:
         #Determine the possible actions
