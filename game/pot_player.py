@@ -4,8 +4,8 @@ from game.deck.card import Card
 from game.hand import Hand
 from game.player_action import PlayerAction
 from game.player_action_type import PlayerActionType
-from game.user import User
 
+from game.user import User
 
 class PotPlayer:
 
@@ -15,7 +15,7 @@ class PotPlayer:
         self.has_folded = False
         self.has_played_turn = False
         self.cards: List[Card] = []
-        self.best_hand: Hand = None 
+        self.best_hand: Card = None 
 
     @property
     def is_all_in(self) -> bool:

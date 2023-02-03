@@ -1,4 +1,3 @@
-
 from typing import List
 from game.pot_player import PotPlayer
 

@@ -1,25 +1,21 @@
 import functools
-from typing import List, Tuple, Union
+from typing import List, Tuple
 from game.deck.card import Card
-
-from game.deck.deck import Deck
 from game.hand import Hand
-from game.player_action import PlayerAction
 from game.player_action_type import PlayerActionType
 
-from game.pot import Pot
-from game.game_round import GameRound
-from game.user import User
 from game.pot_player import PotPlayer
-
+from game.deck.deck import Deck
+from game.game_round import GameRound
+from game.pot import Pot
+from game.user import User
 
 class Game:
 
-    def __init__(self, small_blind_bet: float, big_blind_bet: float) -> None:
-        self.deck: Deck = Deck()
+    def __init__(self, deck: Deck, small_blind_bet: float, big_blind_bet: float) -> None:
+        self.deck: Deck = deck
         self.__players: List[PotPlayer] = []
         self.round: GameRound = GameRound.Pre_Flop
-        # self.allowed_actions: List[PlayerActionType] = []
 
         self.community_cards: List[Card] = []
 
@@ -141,47 +137,7 @@ class Game:
             #Debug
             print(f"During the turn(4th street) round or the River round, these were the cards: {self.community_cards}")
 
-        self.next_turn()
-
-    def play_showdown(self):
-        #Debug
-        print(f"Showdown is starting...\n\n")
-
-        players_not_folded = self.pots[0].get_players_not_folded()
-
-        #Set best hand for each player
-        for player in players_not_folded:
-            player_cards: List[Card] = self.community_cards.copy()
-            for card in player.cards.copy():
-                player_cards.append(card)
-
-            possible_hands = Hand.get_all_5_card_hands(player_cards)
-
-            possible_hands_sorted = sorted(possible_hands, key=functools.cmp_to_key(Hand.compare_hands))
-
-            player.best_hand = possible_hands_sorted[-1]
-
-        #Order the players by their hand strengths
-        ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
-
-        # #Debug
-        # for player in players_not_folded:
-        #     print(f"Player:{player.user.name} has hand {player.best_hand}")
-
-        #Debug
-        print(f"Community cards: {self.community_cards}\n")
-
-        for player in ordered_players:
-            print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n")
-
-        #TODO: Add functionality for side pots
-        winning_player: PotPlayer = ordered_players[-1]
-        total_winnings = self.current_pot.total_money
-        
-        winning_player.user.money += total_winnings
-
-        #Debug
-        print(f"Player: {winning_player.user.name} has won the round and claimed {total_winnings}$ from the pot")          
+        self.next_turn()  
 
     def get_possible_actions(self, player, pot) -> Tuple[List[PlayerActionType], float]:
         #Determine the possible actions
@@ -247,8 +203,10 @@ class Game:
 
         if len(players_not_played) == 0:
             return True
-        elif len(players_not_folded) == 1 and self.round == GameRound.Pre_Flop:
+        elif len(players_not_folded) == 1:
             return True
+        # elif len(players_not_folded) == 1 and self.round == GameRound.Pre_Flop:
+        #     return True
         # if bet_is_matched_all and self.round != GameRound.Pre_Flop:
         #     return True
         # elif bet_is_matched_all and self.round == GameRound.Pre_Flop and len(pot.get_players_not_played()) == 1:
@@ -259,15 +217,51 @@ class Game:
         self.next_turn()
         return False       
 
+    def play_showdown(self):
+        #Debug
+        print(f"Showdown is starting...\n\n")
+
+        players_not_folded = self.pots[0].get_players_not_folded()
+
+        #Set best hand for each player
+        for player in players_not_folded:
+            player_cards: List[Card] = self.community_cards.copy()
+            for card in player.cards.copy():
+                player_cards.append(card)
+
+            possible_hands = Hand.get_all_5_card_hands(player_cards)
+
+            possible_hands_sorted = sorted(possible_hands, key=functools.cmp_to_key(Hand.compare_hands))
+
+            player.best_hand = possible_hands_sorted[-1]
+
+        #Order the players by their hand strengths
+        ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
+
+        #Debug
+        print(f"Community cards: {self.community_cards}\n")
+
+        for player in ordered_players:
+            print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n")
+
+        #TODO: Add functionality for side pots
+        winning_player: PotPlayer = ordered_players[-1]
+        total_winnings = self.current_pot.total_money
+        
+        winning_player.user.money += total_winnings
+
+        #Debug
+        print(f"Player: {winning_player.user.name} has won the round and claimed {total_winnings}$ from the pot\n")        
+
     def payout_on_fold(self) -> None:
         winning_player: PotPlayer = self.current_pot.get_players_not_folded()[0]
 
         #TODO: Add support for side pots
         total_winnings = self.current_pot.total_money
-        
-        #Debug
-        print(f"Player: {winning_player.user.name} has won the hand and claimed {total_winnings}$ from the pot!\n")
         winning_player.user.money += total_winnings
+
+        #Debug
+        print(f"Player: {winning_player.user.name} has won the round and claimed {total_winnings}$ from the pot!\n")
 
     def play_round(self) -> None:
         self.start_round()
@@ -310,7 +304,4 @@ class Game:
         
     @property
     def players(self) -> List[PotPlayer]:
-        return self.__players
-
-        
-            
+        return self.__players    
