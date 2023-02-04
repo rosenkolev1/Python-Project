@@ -39,15 +39,20 @@ class Pot:
         return True
 
     def should_be_split(self) -> bool:
-        players_all_int = map(lambda pot_player: pot_player.is_all_in, self.pot_players)
+        players_all_in = map(lambda pot_player: pot_player.is_all_in, self.pot_players)
         
-        return any(players_all_int) and not all(players_all_int)
+        return any(players_all_in) and not all(players_all_in)
 
     def all_players_have_folded(self) -> bool:
         return len(self.get_players_not_folded()) > 0
 
     def all_players_have_played(self) -> bool:
         return len(self.get_players_not_played()) > 0
+    
+    def all_players_are_all_in(self) -> bool:
+        players_all_in = map(lambda pot_player: pot_player.is_all_in, self.pot_players)
+        
+        return all(players_all_in)
 
     def get_players_have_played(self) -> List[PotPlayer]:
         return [pot_player for pot_player in self.pot_players if pot_player.has_played_turn]
@@ -57,3 +62,9 @@ class Pot:
 
     def get_players_not_folded(self) -> List[PotPlayer]:
         return [pot_player for pot_player in self.pot_players if not pot_player.has_folded]
+    
+    # def get_players_not_folded(self) -> List[PotPlayer]:
+    #     return [pot_player for pot_player in self.pot_players if not pot_player.has_folded]
+    
+    def get_players_not_folded_and_not_all_in(self) -> List[PotPlayer]:
+        return [pot_player for pot_player in self.pot_players if not pot_player.has_folded and not pot_player.is_all_in]

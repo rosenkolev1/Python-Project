@@ -17,9 +17,6 @@ class MockDeck(Deck):
         for i in range(len(cards)):
             self.preset[player_turn + i * self.players_count] = cards[i]  
     
-    # def preset_throw_away_deck(self):
-    #     self.preset: List[Card] = [None]*52
-    
     def preset_flop(self, cards: List[Card]):
         self.preset.append(None)
         

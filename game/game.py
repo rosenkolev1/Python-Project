@@ -43,6 +43,16 @@ class Game:
 
         self.pots.clear()
 
+        if self.two_player_game:
+            self.small_blind_holder = 0
+            self.big_blind_holder = 1
+
+        print(f"The dealer is: {self.dealer_player.user.name}")
+        print(f"The small blind player is: {self.small_blind_player.user.name}")
+        print(f"The big blind player is: {self.big_blind_player.user.name}\n")
+        
+        print(f"The players, starting from the dealer, are: {' --> '.join(map(lambda p: p.user.name, self.players))}\n")
+        
         main_pot: Pot = Pot()
 
         main_pot.place_bet(self.small_blind_player, self.small_blind_bet)
@@ -50,17 +60,10 @@ class Game:
         
         #Debug
         print(f"Player: {self.small_blind_player.user.name} is entering the small blind amount of {self.small_blind_bet}! Their current balance is {self.small_blind_player.user.money}")
-        print(f"Player: {self.small_blind_player.user.name} is entering the big blind amount of {self.big_blind_bet}! Their current balance is {self.big_blind_player.user.money}\n")
+        print(f"Player: {self.big_blind_player.user.name} is entering the big blind amount of {self.big_blind_bet}! Their current balance is {self.big_blind_player.user.money}\n")
 
         self.pots.append(main_pot)
         self.current_pot_index = 0
-
-        if self.two_player_game:
-            self.small_blind_holder = 0
-
-        print(f"The dealer is: {self.dealer_player.user.name}")
-        print(f"The small blind player is: {self.small_blind_player.user.name}")
-        print(f"The big blind player is: {self.big_blind_player.user.name}\n")
 
         #Debug
         print(f"Game is starting...\n")
@@ -112,8 +115,12 @@ class Game:
         self.dealer_index = self.__next_index(self.dealer_index)
 
     def next_turn(self) -> None:
-        self.turn = self.__next_index(self.turn)
-
+        while True:
+            self.turn = self.__next_index(self.turn)
+            
+            if not self.current_player.has_played_turn:
+                break
+       
     def _deal_players_cards(self):
         #Give out a card to each player once and then twice(because that is how you deal poker hands, one at a time)
         for i in range(2):         
@@ -152,6 +159,11 @@ class Game:
             
         elif self.round == GameRound.Turn or self.round == GameRound.River:
             self._deal_turn_or_river()
+            
+    def deal_until_showdown(self):
+        while len(self.community_cards) != 5:
+            self.deal_cards()
+            self.next_round()        
 
     def start_round(self): 
         #Debug
@@ -161,8 +173,8 @@ class Game:
         if (self.round != GameRound.Pre_Flop):
             self.current_pot.current_highest_stake = 0
 
-        #Reset the has_played_turn status for all the players who have not folded
-        for player in self.current_pot.get_players_not_folded():
+        #Reset the has_played_turn status for all the players who have not folded and are not all-in
+        for player in self.current_pot.get_players_not_folded_and_not_all_in():
             player.has_played_turn = False
 
         #Set the first person to act during the round. If we are in pre-flop, then that is the person after the big_blind_holder.
@@ -176,7 +188,7 @@ class Game:
 
         self.next_turn()  
 
-    def get_possible_actions(self, player, pot) -> Tuple[List[PlayerActionType], float]:
+    def get_possible_actions(self, player: PotPlayer, pot: Pot) -> Tuple[List[PlayerActionType], float]:
         #Determine the possible actions
         call_amount: float = 0
         possible_actions: List[PlayerActionType] = []
@@ -190,46 +202,73 @@ class Game:
             if stake != pot.current_highest_stake:
                 possible_actions.append(PlayerActionType.CALL)
 
-                call_amount = min(pot.current_highest_stake - stake, player.user.money)
+                highest_stake_diff: float = pot.current_highest_stake - stake
+                call_amount: float = min(highest_stake_diff, player.user.money)
 
-                can_raise: bool = call_amount <= player.user.money
+                can_raise: bool = highest_stake_diff <= player.user.money and any(map(lambda x: x != player and not x.is_all_in, pot.pot_players))
 
                 if can_raise:
                     possible_actions.append(PlayerActionType.RAISE)
             #In this case, nobody has bet thus far this round
             else:
                 possible_actions.append(PlayerActionType.CHECK)
-                possible_actions.append(PlayerActionType.BET)
+                
+                #This is only possible for the big_blind_holder during the pre-flop, where can either choose to Check or to raise the big_blind
+                if stake == pot.current_highest_stake and stake == 0:                    
+                    possible_actions.append(PlayerActionType.RAISE)
+                else:
+                    possible_actions.append(PlayerActionType.BET)
 
         return (possible_actions, call_amount)
 
     def play_turn(self) -> bool:
         player = self.current_player
         pot = self.current_pot
+        
+        # players_that_can_play_other_than_current_player: List[PotPlayer] = [p for p in self.current_pot.get_players_not_folded_and_not_all_in() if p != player]
 
+        #This should normally be impossible, but just in case
         if player.is_all_in:
             #Debug
             print(f"Player: {player.user.name} is all in with amount {pot.get_stake_for_player(player)}! Their current balance is {player.user.money}\n")
+        #This should normally be impossible, but just in case
+        elif player.has_folded:
+            #Debug
+            print(f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n")
+        # elif len(players_that_can_play_other_than_current_player) == 0 and player.has_played_turn:
+        #     #DEBUG, in this case, the current player cannot play anything and the round should be over
+        #     print("asdsadsasasdfdjkasdksakdsahdsadsahdskasdjasdkja")
         else:
             #Determine the possible actions
             possible_actions, call_amount = self.get_possible_actions(player, pot)
 
-            #TODO: Change this to be polymorphic for different possible players
             action: PlayerAction = player.choose_action(possible_actions, call_amount)
 
             if action.type == PlayerActionType.FOLD:
                 player.has_folded = True
             elif action.type == PlayerActionType.RAISE or action.type == PlayerActionType.BET:
-                #For each player that has not folded, reset their has_played_turn state
+                #For each player that has not folded or is not all-in, reset their has_played_turn state
                 for other_player in self.players:
-                    if not other_player.has_folded:
+                    if not other_player.has_folded and not other_player.is_all_in:
                         other_player.has_played_turn = False
 
             if action.type != PlayerActionType.FOLD and action.type != PlayerActionType.CHECK:
                 pot.place_bet(player, action.amount)
-
-            #Debug
-            print(f"Player: {player.user.name} is doing {action.type} with amount {action.amount}! Their current balance is {player.user.money}\n")
+                
+                #In this case, we are not all-in
+                if player.user.money != 0:
+                    #Debug
+                    print(f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount}! Their current balance is {player.user.money}\n")
+                if player.user.money == 0:
+                    #Debug
+                    print(f"Player: {player.user.name} is going all-in! Their current balance is {player.user.money}\n")
+                    
+            elif action.type == PlayerActionType.FOLD:
+                #Debug
+                print(f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n")
+            elif action.type == PlayerActionType.CHECK:
+                #Debug
+                print(f"Player: {player.user.name} has checked! Their current balance is {player.user.money}\n")
 
         player.has_played_turn = True
         
@@ -276,7 +315,6 @@ class Game:
             self.calc_best_hand(player)
 
     def payout_winner(self, pot: Pot, ordered_players: List[PotPlayer]):
-        #TODO: add functionality for splitting the pot winning amongst the equal winners
         winning_player: PotPlayer = ordered_players[-1]
         total_winnings = pot.total_money
         
@@ -291,7 +329,7 @@ class Game:
         
         for pot in self.pots:
             #Debug
-            print(f"Resolving Pot #{self.pots.index(pot)}:\n")
+            print(f"Resolving Pot #{self.pots.index(pot)} -- Money in pot: {pot.total_money}$\n")
             
             players_not_folded = pot.get_players_not_folded()
             
@@ -308,7 +346,6 @@ class Game:
                 #Order the players by their hand strengths
                 ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
 
-                #TODO: Add functionality for side pots
                 self.payout_winner(pot, ordered_players)
                 
             #In this case, all but one players have folded, so no need to calc best card
@@ -365,20 +402,22 @@ class Game:
                 # In this case, there is one remaining person on the main pot, but there is at least one other person who is all-in on a side pot
                 # This means that we have to deal all the community cards
                 else:
-                    while len(self.community_cards) != 5:
-                        self.deal_cards()
-                        self.next_round()
-
-                    self.play_showdown()
-                    
+                    self.deal_until_showdown()
+                    self.play_showdown()                  
                 break
+            #In this case, all the players of the main pot are all-in, so just proceed to get all the community cards out and play the showdown
+            elif round_over and self.current_pot.all_players_are_all_in():
+                self.deal_until_showdown()
+                self.play_showdown()
+                break   
+                
             elif round_over:
                 self.play_round()
                 break
 
     def next_round(self):
         #Debug
-        print(f"{self.round} is over...\n")
+        print(f"{self.round} is over...\n{'-'.join(['']*100)}\n")
         self.round = self.round.next_round()
 
     @property
