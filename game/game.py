@@ -1,7 +1,10 @@
 import functools
 from typing import List, Tuple
+from multipledispatch import dispatch
+
 from game.deck.card import Card
 from game.hand import Hand
+from game.player_action import PlayerAction
 from game.player_action_type import PlayerActionType
 
 from game.pot_player import PotPlayer
@@ -44,20 +47,23 @@ class Game:
 
         main_pot.place_bet(self.small_blind_player, self.small_blind_bet)
         main_pot.place_bet(self.big_blind_player, self.big_blind_bet)
+        
+        #Debug
+        print(f"Player: {self.small_blind_player.user.name} is entering the small blind amount of {self.small_blind_bet}! Their current balance is {self.small_blind_player.user.money}")
+        print(f"Player: {self.small_blind_player.user.name} is entering the big blind amount of {self.big_blind_bet}! Their current balance is {self.big_blind_player.user.money}\n")
 
         self.pots.append(main_pot)
         self.current_pot_index = 0
 
         if self.two_player_game:
-            self.big_blind_holder = 0
-        else:
-            self.big_blind_holder = 2
+            self.small_blind_holder = 0
 
-        print(f"The big blind player is: {self.big_blind_player.user.name}")
-        print(f"The small blind player is: {self.small_blind_player.user.name}\n")
+        print(f"The dealer is: {self.dealer_player.user.name}")
+        print(f"The small blind player is: {self.small_blind_player.user.name}")
+        print(f"The big blind player is: {self.big_blind_player.user.name}\n")
 
         #Debug
-        print(f"Game is starting...\n\n")
+        print(f"Game is starting...\n")
             
         #Shuffle deck
         self.deck.shuffle_deck()
@@ -67,9 +73,20 @@ class Game:
         #Debug
         print(f"Game has ended...\n\n")
 
-    def add_player(self, user: User) -> None:
-        if user.money < self.big_blind_bet:
+    def _validate_money_for_big_blind_bet(self, money: float) -> None:
+        if money < self.big_blind_bet:
             raise ValueError("The player that you are trying to add has less money than required to enter the game!")
+        
+    @dispatch(PotPlayer)
+    def add_player(self, player: PotPlayer) -> None:
+        self._validate_money_for_big_blind_bet(player.user.money)
+
+        self.players.append(player)
+        self.two_player_game = len(self.players) == 2
+
+    @dispatch(User)
+    def add_player(self, user: User) -> None:
+        self._validate_money_for_big_blind_bet(user.money)
 
         self.players.append(PotPlayer(user))
         self.two_player_game = len(self.players) == 2
@@ -97,6 +114,45 @@ class Game:
     def next_turn(self) -> None:
         self.turn = self.__next_index(self.turn)
 
+    def _deal_players_cards(self):
+        #Give out a card to each player once and then twice(because that is how you deal poker hands, one at a time)
+        for i in range(2):         
+            for player in self.players:
+                player.cards.append(self.deck.cards.pop())
+            
+        #Debug
+        for player in self.players: 
+            print(f"Player: {player.user.name} has drawn cards: {player.cards}")
+            
+        print()
+
+    def _deal_flop(self):
+        self.deck.cards.pop()
+        
+        for i in range(0, 3):
+            self.community_cards.append(self.deck.cards.pop())
+
+        #Debug
+        print(f"During the flop round these cards were drawn: {self.community_cards}\n")
+        
+    def _deal_turn_or_river(self):
+        self.deck.cards.pop()
+        
+        self.community_cards.append(self.deck.cards.pop())
+
+        #Debug
+        print(f"During the turn(4th street) round or the River round, these were the cards: {self.community_cards}\n")
+
+    def deal_cards(self):
+        if self.round == GameRound.Pre_Flop:
+            self._deal_players_cards()
+
+        if self.round == GameRound.Flop:
+            self._deal_flop()
+            
+        elif self.round == GameRound.Turn or self.round == GameRound.River:
+            self._deal_turn_or_river()
+
     def start_round(self): 
         #Debug
         print(f"{self.round} is starting...\n")
@@ -105,37 +161,18 @@ class Game:
         if (self.round != GameRound.Pre_Flop):
             self.current_pot.current_highest_stake = 0
 
-        #Reset the has_played status for all the players who have not folded
+        #Reset the has_played_turn status for all the players who have not folded
         for player in self.current_pot.get_players_not_folded():
             player.has_played_turn = False
 
+        #Set the first person to act during the round. If we are in pre-flop, then that is the person after the big_blind_holder.
+        #Else, it is the person after the dealer(the small_blind_holder, who is inbetween the dealer and the big_blind_holder)
         if self.round == GameRound.Pre_Flop:
             self.turn = self.big_blind_holder
         else:
             self.turn = self.dealer_index    
 
-        if self.round == GameRound.Pre_Flop:
-            #Give out 2 cards to each player
-            for player in self.players:
-                player.cards.append(self.deck.cards.pop())
-                player.cards.append(self.deck.cards.pop())
-
-                #Debug
-                print(f"Player: {player.user.name} has drawn cards: {player.cards}\n")
-        else:
-            self.deck.cards.pop()
-
-        if self.round == GameRound.Flop:
-            for i in range(0, 3):
-                self.community_cards.append(self.deck.cards.pop())
-
-            #Debug
-            print(f"During the flop round these cards were drawn: {self.community_cards}")
-        elif self.round == GameRound.Turn or self.round == GameRound.River:
-            self.community_cards.append(self.deck.cards.pop())
-
-            #Debug
-            print(f"During the turn(4th street) round or the River round, these were the cards: {self.community_cards}")
+        self.deal_cards()
 
         self.next_turn()  
 
@@ -196,8 +233,6 @@ class Game:
 
         player.has_played_turn = True
         
-        # bet_is_matched_all = pot.bet_is_matched_all()
-
         players_not_played: List[PotPlayer] = pot.get_players_not_played()
         players_not_folded: List[PotPlayer] = pot.get_players_not_folded()
 
@@ -205,63 +240,109 @@ class Game:
             return True
         elif len(players_not_folded) == 1:
             return True
-        # elif len(players_not_folded) == 1 and self.round == GameRound.Pre_Flop:
-        #     return True
-        # if bet_is_matched_all and self.round != GameRound.Pre_Flop:
-        #     return True
-        # elif bet_is_matched_all and self.round == GameRound.Pre_Flop and len(pot.get_players_not_played()) == 1:
-        #     return True
-        # elif bet_is_matched_all and self.round == GameRound.Pre_Flop and pot.current_highest_stake == self.big_blind_bet and player == self.big_blind_player:
-        #     return True
 
         self.next_turn()
         return False       
 
     def play_showdown(self):
         #Debug
-        print(f"Showdown is starting...\n\n")
+        print(f"Showdown is starting...\n")
 
-        players_not_folded = self.pots[0].get_players_not_folded()
-
-        #Set best hand for each player
-        for player in players_not_folded:
-            player_cards: List[Card] = self.community_cards.copy()
-            for card in player.cards.copy():
-                player_cards.append(card)
-
-            possible_hands = Hand.get_all_5_card_hands(player_cards)
-
-            possible_hands_sorted = sorted(possible_hands, key=functools.cmp_to_key(Hand.compare_hands))
-
-            player.best_hand = possible_hands_sorted[-1]
-
-        #Order the players by their hand strengths
-        ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
-
+        # players_not_folded = self.pots[0].get_players_not_folded()
+        
         #Debug
         print(f"Community cards: {self.community_cards}\n")
+        
+        self.payout()
 
-        for player in ordered_players:
-            print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n")
+        
+    def calc_best_hand(self, player: PotPlayer):
+        if player.best_hand is not None:
+            return
+        
+        player_cards: List[Card] = self.community_cards.copy()
+        for card in player.cards.copy():
+            player_cards.append(card)
 
-        #TODO: Add functionality for side pots
+        possible_hands = Hand.get_all_5_card_hands(player_cards)
+
+        possible_hands_sorted = sorted(possible_hands, key=functools.cmp_to_key(Hand.compare_hands))
+
+        player.best_hand = possible_hands_sorted[-1]
+        
+    def calc_best_hands(self, players: List[PotPlayer]):
+        #Set best hand for each player
+        for player in players:
+            self.calc_best_hand(player)
+
+    def payout_winner(self, pot: Pot, ordered_players: List[PotPlayer]):
+        #TODO: add functionality for splitting the pot winning amongst the equal winners
         winning_player: PotPlayer = ordered_players[-1]
-        total_winnings = self.current_pot.total_money
+        total_winnings = pot.total_money
         
         winning_player.user.money += total_winnings
-
+        
         #Debug
-        print(f"Player: {winning_player.user.name} has won the round and claimed {total_winnings}$ from the pot\n")        
+        print(f"Player: {winning_player.user.name} has won Pot #{self.pots.index(pot)} and claimed {total_winnings}$ from the pot\n")
 
-    def payout_on_fold(self) -> None:
-        winning_player: PotPlayer = self.current_pot.get_players_not_folded()[0]
+    def payout(self) -> None:
+        #Reverse the pots, because we need to start from the most recent side pot and then move down the main pot
+        self.pots.reverse()
+        
+        for pot in self.pots:
+            #Debug
+            print(f"Resolving Pot #{self.pots.index(pot)}:\n")
+            
+            players_not_folded = pot.get_players_not_folded()
+            
+            #Debug
+            print(f"Players: {', '.join(map(lambda x: x.user.name, players_not_folded))}\n")                
+            
+            #In this case, we have all 5 community cards needed to calculate the best cards, because there are at least 2 people who got to showdown round
+            if len(players_not_folded) > 1:
+                for player in players_not_folded:
+                    self.calc_best_hand(player)   
+                    
+                    print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n")
+                   
+                #Order the players by their hand strengths
+                ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
 
-        #TODO: Add support for side pots
-        total_winnings = self.current_pot.total_money
-        winning_player.user.money += total_winnings
+                #TODO: Add functionality for side pots
+                self.payout_winner(pot, ordered_players)
+                
+            #In this case, all but one players have folded, so no need to calc best card
+            #(which may not be calculateable anyway because it is not guaranteed that all 5 community cards have appeared) 
+            else:
+                self.payout_winner(pot, players_not_folded)
+            
 
-        #Debug
-        print(f"Player: {winning_player.user.name} has won the round and claimed {total_winnings}$ from the pot!\n")
+    def split_current_pot(self) -> None:
+        #Order the players in the pot by their stakes
+        self.current_pot.pot_players.sort(key=lambda p: p.stake)
+        
+        while self.current_pot.should_be_split():
+            pot: Pot = self.current_pot
+            players: List[PotPlayer] = self.current_pot.get_players_not_folded()
+            
+            for player in players:
+                if player.is_all_in:
+                    player_stake = player.stake
+                    pot.total_money = len(players) * player_stake
+                    
+                    side_pot: Pot = Pot()                     
+                    side_players = filter(lambda x: x != player, players)
+                    
+                    #Add the left over players to the side pot and transfer their remaining stakes to the side pot
+                    for side_player in side_players:
+                        side_pot.pot_players.append(side_player)
+                        side_player.stake -= player_stake
+                        side_pot.total_money += side_player.stake
+                        
+                    self.pots.append(side_pot)
+                    self.current_pot_index += 1
+                    
+                    break
 
     def play_round(self) -> None:
         self.start_round()
@@ -270,17 +351,35 @@ class Game:
             round_over = self.play_turn()
 
             if round_over:
-                self.round = self.round.next_round()
+                self.split_current_pot()
+                self.next_round()
 
             if round_over and self.round == GameRound.Showdown:
                 self.play_showdown()
                 break
-            elif round_over and len(self.current_pot.get_players_not_folded()) == 1:
-                self.payout_on_fold()
+            elif round_over and len(self.current_pot.get_players_not_folded()) == 1:          
+                # In this case, there is only the main pot and all but one players have folded it, so no need to get all 5 community cards
+                if len(self.pots) == 1:           
+                    self.payout()
+                
+                # In this case, there is one remaining person on the main pot, but there is at least one other person who is all-in on a side pot
+                # This means that we have to deal all the community cards
+                else:
+                    while len(self.community_cards) != 5:
+                        self.deal_cards()
+                        self.next_round()
+
+                    self.play_showdown()
+                    
                 break
             elif round_over:
                 self.play_round()
                 break
+
+    def next_round(self):
+        #Debug
+        print(f"{self.round} is over...\n")
+        self.round = self.round.next_round()
 
     @property
     def is_two_player_game(self) -> bool:
@@ -301,6 +400,10 @@ class Game:
     @property
     def small_blind_player(self) -> PotPlayer:
         return self.players[self.small_blind_holder]
+    
+    @property
+    def dealer_player(self) -> PotPlayer:
+        return self.players[self.dealer_index]
         
     @property
     def players(self) -> List[PotPlayer]:

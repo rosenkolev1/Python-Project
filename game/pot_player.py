@@ -9,7 +9,7 @@ from game.user import User
 
 class PotPlayer:
 
-    def __init__(self, user: User, stake:float = 0 ) -> None:
+    def __init__(self, user: User, stake:float = 0) -> None:
         self.user = user
         self.stake = stake
         self.has_folded = False
