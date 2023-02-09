@@ -6,3 +6,4 @@ class PlayerActionType(Enum):
     CALL = "Call"
     BET = "Bet"
     RAISE = "Raise"
+    ALL_IN = "All-in"

@@ -112,7 +112,7 @@ def test_3_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: U
 
     player_first_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
-                PlayerAction(PlayerActionType.RAISE, 100) #Pre-flop
+                PlayerAction(PlayerActionType.ALL_IN, 100) #Pre-flop
             ]
         )
     
@@ -130,10 +130,10 @@ def test_3_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: U
     player_third_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
                 PlayerAction(PlayerActionType.CALL, 50), #Pre-flop
-                PlayerAction(PlayerActionType.RAISE, 50), #Flop
+                PlayerAction(PlayerActionType.BET, 50), #Flop
                 PlayerAction(PlayerActionType.CHECK, 0), #Turn
-                PlayerAction(PlayerActionType.RAISE, 30)
-            ], #River
+                PlayerAction(PlayerActionType.BET, 30) #River
+            ], 
         )
 
     player_first = BotPlayer(user_first, player_first_actions)
@@ -182,7 +182,7 @@ def test_3_players_single_side_pot_winner_is_from_side_pot_no_fold(user_first: U
 
     player_first_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
-                PlayerAction(PlayerActionType.RAISE, 100) #Pre-flop
+                PlayerAction(PlayerActionType.ALL_IN, 100) #Pre-flop
             ]
         )
     
@@ -200,10 +200,10 @@ def test_3_players_single_side_pot_winner_is_from_side_pot_no_fold(user_first: U
     player_third_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
                 PlayerAction(PlayerActionType.CALL, 50), #Pre-flop
-                PlayerAction(PlayerActionType.RAISE, 50), #Flop
+                PlayerAction(PlayerActionType.BET, 50), #Flop
                 PlayerAction(PlayerActionType.CHECK, 0), #Turn
-                PlayerAction(PlayerActionType.RAISE, 30)
-            ], #River
+                PlayerAction(PlayerActionType.BET, 30) #River
+            ],
         )
 
     player_first = BotPlayer(user_first, player_first_actions)
@@ -255,7 +255,7 @@ def test_3_players_single_side_pot_winner_is_all_in_others_fold(user_first: User
 
     player_first_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
-                PlayerAction(PlayerActionType.RAISE, 100) #Pre-flop
+                PlayerAction(PlayerActionType.ALL_IN, 100) #Pre-flop
             ]
         )
     
@@ -308,7 +308,7 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_looses_no_fo
 
     player_first_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
-                PlayerAction(PlayerActionType.RAISE, 100) #Pre-flop
+                PlayerAction(PlayerActionType.ALL_IN, 100) #Pre-flop
             ]
         )
     
@@ -326,10 +326,10 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_looses_no_fo
     player_third_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
                 PlayerAction(PlayerActionType.CALL, 50), #Pre-flop
-                PlayerAction(PlayerActionType.RAISE, 50), #Flop
+                PlayerAction(PlayerActionType.BET, 50), #Flop
                 PlayerAction(PlayerActionType.CHECK, 0), #Turn
-                PlayerAction(PlayerActionType.RAISE, 30)
-            ], #River
+                PlayerAction(PlayerActionType.BET, 30) #River
+            ],
         )
 
     player_first = BotPlayer(user_first, player_first_actions)
@@ -381,7 +381,7 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_wins_side(us
 
     player_first_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
-                PlayerAction(PlayerActionType.RAISE, 100) #Pre-flop
+                PlayerAction(PlayerActionType.ALL_IN, 100) #Pre-flop
             ]
         )
     
@@ -399,10 +399,10 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_wins_side(us
     player_third_actions = ChooseActionFactory.create_choose_action_predetermined(
             [
                 PlayerAction(PlayerActionType.CALL, 50), #Pre-flop
-                PlayerAction(PlayerActionType.RAISE, 50), #Flop
+                PlayerAction(PlayerActionType.BET, 50), #Flop
                 PlayerAction(PlayerActionType.CHECK, 0), #Turn
-                PlayerAction(PlayerActionType.RAISE, 30)
-            ], #River
+                PlayerAction(PlayerActionType.BET, 30) #River
+            ],
         )
 
     player_first = BotPlayer(user_first, player_first_actions)

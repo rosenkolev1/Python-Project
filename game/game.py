@@ -201,18 +201,25 @@ class Game:
             possible_actions.append(PlayerActionType.FOLD)
             stake = pot.get_stake_for_player(player)
 
+            #The player can always choose to go all-in
+            possible_actions.append(PlayerActionType.ALL_IN)
+
             #In this case, there has been a bet this round already (big blind during pre-flop counts as a bet)
             if 0 != pot.current_highest_stake:
-                possible_actions.append(PlayerActionType.CALL)
-
                 highest_stake_diff: float = pot.current_highest_stake - stake
-                call_amount: float = min(highest_stake_diff, player.user.money)
+
+                calling_is_all_in = highest_stake_diff >= player.user.money
+
+                call_amount: float = min(highest_stake_diff, player.user.money)   
 
                 #This happens at the start of the new rounds, i.e. when there is not bet to call on
                 if call_amount < 0:
                     call_amount = 0
 
-                can_raise: bool = highest_stake_diff < player.user.money and any(map(lambda x: x != player and not x.is_all_in, pot.players))
+                can_raise: bool = not calling_is_all_in and any(map(lambda x: x != player and not x.is_all_in, pot.players))
+
+                if not calling_is_all_in:
+                    possible_actions.append(PlayerActionType.CALL)
 
                 if can_raise:
                     possible_actions.append(PlayerActionType.RAISE)
@@ -246,9 +253,12 @@ class Game:
 
             action: PlayerAction = player.choose_action(possible_actions, call_amount)
 
+            is_all_in: bool = action.type == PlayerActionType.ALL_IN
+            is_all_in_and_raise: bool = is_all_in and action.amount > pot.current_highest_stake
+
             if action.type == PlayerActionType.FOLD:
                 player.has_folded = True
-            elif action.type == PlayerActionType.RAISE or action.type == PlayerActionType.BET:
+            elif action.type == PlayerActionType.RAISE or action.type == PlayerActionType.BET or is_all_in_and_raise:
                 #For each player that has not folded or is not all-in, reset their has_played_turn state
                 for other_player in self.players:
                     if not other_player.has_folded and not other_player.is_all_in:
@@ -258,12 +268,15 @@ class Game:
                 pot.place_bet(player, action.amount)
                 
                 #In this case, we are not all-in
-                if player.user.money != 0:
+                if not is_all_in:
                     #Debug
-                    print(f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount}! Their current balance is {player.user.money}\n")
-                if player.user.money == 0:
+                    if action.type == PlayerActionType.RAISE:
+                        print(f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount - call_amount}$! Their current balance is {player.user.money}$\n")
+                    else:
+                        print(f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount}$! Their current balance is {player.user.money}$\n")
+                else:
                     #Debug
-                    print(f"Player: {player.user.name} is going all-in! Their current balance is {player.user.money}\n")
+                    print(f"Player: {player.user.name} is going all-in with {action.amount}$! Their current balance is {player.user.money}$\n")
                     
             elif action.type == PlayerActionType.FOLD:
                 #Debug
@@ -288,8 +301,6 @@ class Game:
     def play_showdown(self):
         #Debug
         print(f"Showdown is starting...\n")
-
-        # players_not_folded = self.pots[0].get_players_not_folded()
         
         #Debug
         print(f"Community cards: {self.community_cards}\n")

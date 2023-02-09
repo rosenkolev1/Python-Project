@@ -32,15 +32,22 @@ class ChooseActionFactory:
         action_type: PlayerActionType = None
         
         if PlayerActionType.RAISE in possible_actions:        
-            action_type: PlayerActionType = PlayerActionType.RAISE
+            action_type = PlayerActionType.RAISE
         elif PlayerActionType.BET in possible_actions:
-            action_type: PlayerActionType = PlayerActionType.BET
+            action_type = PlayerActionType.BET
         elif PlayerActionType.CALL in possible_actions:
-            action_type: PlayerActionType = PlayerActionType.CALL
+            action_type = PlayerActionType.CALL
+        elif PlayerActionType.BET in possible_actions:
+            action_type = PlayerActionType.ALL_IN
 
         if action_type == PlayerActionType.CALL:
-            return PlayerAction(action_type, call_amount) 
-
+            return PlayerAction(action_type, call_amount)
+        elif action_type == PlayerActionType.ALL_IN:
+            return PlayerAction(action_type, self.user.money)
+ 
         amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+
+        if amount == self.user.money:
+            action_type = PlayerActionType.ALL_IN
 
         return PlayerAction(action_type, amount)

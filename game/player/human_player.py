@@ -18,9 +18,11 @@ class HumanPlayer(Player):
             return "Raise <amount-raise>"
         elif action == PlayerActionType.BET:
             return"Bet <amount-bet>"
+        elif action == PlayerActionType.ALL_IN:
+            return f"All-in {self.user.money}$"
         elif action == PlayerActionType.CALL:
             return f"Call {call_amount}$"
-
+            
         raise ValueError("Invalid action command!")
 
     def choose_actions_command_prompt(self, actions: List[PlayerActionType], call_amount: float) -> str:
@@ -44,6 +46,7 @@ class HumanPlayer(Player):
 
             if command.lower() == PlayerActionType.FOLD.value.lower():
                 return PlayerAction(PlayerActionType.FOLD, 0)
+
             elif command.lower() == PlayerActionType.CHECK.value.lower():
                 return PlayerAction(PlayerActionType.CHECK, 0)
 
@@ -57,7 +60,11 @@ class HumanPlayer(Player):
 
                 return PlayerAction(PlayerActionType.BET, amount)
 
+            elif command.lower() == PlayerActionType.ALL_IN.value.lower():
+                return PlayerAction(PlayerActionType.ALL_IN, self.user.money)
+
             elif command.lower() == PlayerActionType.CALL.value.lower():
                 return PlayerAction(PlayerActionType.CALL, call_amount)
+
             else:
                 print("\nThe given command is invalid, try again!\n")
