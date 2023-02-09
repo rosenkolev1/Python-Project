@@ -3,7 +3,7 @@ from typing import List
 from game.deck.card import Card
 from game.deck.deck import Deck
 
-class MockEmptyDeck(Deck):
+class PresetEmptyDeck(Deck):
     
     def __init__(self) -> None:
         super().__init__()

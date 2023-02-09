@@ -1,6 +1,8 @@
 {
     // "python.analysis.extraPaths": [
-    //     "./game",
-    //     "./game/deck",
+    //     "./test"
+    // ]
+    // "python.analysis.extraPaths": [
+    //     "./mock"
     // ]
 }

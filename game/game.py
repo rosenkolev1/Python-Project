@@ -3,11 +3,11 @@ from typing import List, Tuple
 from multipledispatch import dispatch
 
 from game.deck.card import Card
-from game.hand import Hand
-from game.player_action import PlayerAction
-from game.player_action_type import PlayerActionType
+from game.hand.hand import Hand
+from game.player.player_action import PlayerAction
+from game.player.player_action_type import PlayerActionType
 
-from game.pot_player import PotPlayer
+from game.player.player import Player
 from game.deck.deck import Deck
 from game.game_round import GameRound
 from game.pot import Pot
@@ -17,7 +17,7 @@ class Game:
 
     def __init__(self, deck: Deck, small_blind_bet: float, big_blind_bet: float) -> None:
         self.deck: Deck = deck
-        self.__players: List[PotPlayer] = []
+        self.__players: List[Player] = []
         self.round: GameRound = GameRound.Pre_Flop
 
         self.community_cards: List[Card] = []
@@ -80,8 +80,8 @@ class Game:
         if money < self.big_blind_bet:
             raise ValueError("The player that you are trying to add has less money than required to enter the game!")
         
-    @dispatch(PotPlayer)
-    def add_player(self, player: PotPlayer) -> None:
+    @dispatch(Player)
+    def add_player(self, player: Player) -> None:
         self._validate_money_for_big_blind_bet(player.user.money)
 
         self.players.append(player)
@@ -91,7 +91,7 @@ class Game:
     def add_player(self, user: User) -> None:
         self._validate_money_for_big_blind_bet(user.money)
 
-        self.players.append(PotPlayer(user))
+        self.players.append(Player(user))
         self.two_player_game = len(self.players) == 2
 
     def __next_index(self, indexer: int) -> int:
@@ -188,7 +188,7 @@ class Game:
 
         self.next_turn()  
 
-    def get_possible_actions(self, player: PotPlayer, pot: Pot) -> Tuple[List[PlayerActionType], float]:
+    def get_possible_actions(self, player: Player, pot: Pot) -> Tuple[List[PlayerActionType], float]:
         #Determine the possible actions
         call_amount: float = 0
         possible_actions: List[PlayerActionType] = []
@@ -205,7 +205,7 @@ class Game:
                 highest_stake_diff: float = pot.current_highest_stake - stake
                 call_amount: float = min(highest_stake_diff, player.user.money)
 
-                can_raise: bool = highest_stake_diff <= player.user.money and any(map(lambda x: x != player and not x.is_all_in, pot.pot_players))
+                can_raise: bool = highest_stake_diff <= player.user.money and any(map(lambda x: x != player and not x.is_all_in, pot.players))
 
                 if can_raise:
                     possible_actions.append(PlayerActionType.RAISE)
@@ -225,7 +225,7 @@ class Game:
         player = self.current_player
         pot = self.current_pot
         
-        # players_that_can_play_other_than_current_player: List[PotPlayer] = [p for p in self.current_pot.get_players_not_folded_and_not_all_in() if p != player]
+        # players_that_can_play_other_than_current_player: List[Player] = [p for p in self.current_pot.get_players_not_folded_and_not_all_in() if p != player]
 
         #This should normally be impossible, but just in case
         if player.is_all_in:
@@ -272,8 +272,8 @@ class Game:
 
         player.has_played_turn = True
         
-        players_not_played: List[PotPlayer] = pot.get_players_not_played()
-        players_not_folded: List[PotPlayer] = pot.get_players_not_folded()
+        players_not_played: List[Player] = pot.get_players_not_played()
+        players_not_folded: List[Player] = pot.get_players_not_folded()
 
         if len(players_not_played) == 0:
             return True
@@ -295,7 +295,7 @@ class Game:
         self.payout()
 
         
-    def calc_best_hand(self, player: PotPlayer):
+    def calc_best_hand(self, player: Player):
         if player.best_hand is not None:
             return
         
@@ -309,13 +309,13 @@ class Game:
 
         player.best_hand = possible_hands_sorted[-1]
         
-    def calc_best_hands(self, players: List[PotPlayer]):
+    def calc_best_hands(self, players: List[Player]):
         #Set best hand for each player
         for player in players:
             self.calc_best_hand(player)
 
-    def payout_winner(self, pot: Pot, ordered_players: List[PotPlayer]):
-        winning_player: PotPlayer = ordered_players[-1]
+    def payout_winner(self, pot: Pot, ordered_players: List[Player]):
+        winning_player: Player = ordered_players[-1]
         total_winnings = pot.total_money
         
         winning_player.user.money += total_winnings
@@ -344,7 +344,7 @@ class Game:
                     print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n")
                    
                 #Order the players by their hand strengths
-                ordered_players: List[PotPlayer] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
+                ordered_players: List[Player] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
 
                 self.payout_winner(pot, ordered_players)
                 
@@ -356,11 +356,11 @@ class Game:
 
     def split_current_pot(self) -> None:
         #Order the players in the pot by their stakes
-        self.current_pot.pot_players.sort(key=lambda p: p.stake)
+        self.current_pot.players.sort(key=lambda p: p.stake)
         
         while self.current_pot.should_be_split():
             pot: Pot = self.current_pot
-            players: List[PotPlayer] = self.current_pot.get_players_not_folded()
+            players: List[Player] = self.current_pot.get_players_not_folded()
             
             for player in players:
                 if player.is_all_in:
@@ -372,7 +372,7 @@ class Game:
                     
                     #Add the left over players to the side pot and transfer their remaining stakes to the side pot
                     for side_player in side_players:
-                        side_pot.pot_players.append(side_player)
+                        side_pot.players.append(side_player)
                         side_player.stake -= player_stake
                         side_pot.total_money += side_player.stake
                         
@@ -429,21 +429,21 @@ class Game:
         return self.pots[self.current_pot_index]
 
     @property
-    def current_player(self) -> PotPlayer:
+    def current_player(self) -> Player:
         return self.players[self.turn]
 
     @property
-    def big_blind_player(self) -> PotPlayer:
+    def big_blind_player(self) -> Player:
         return self.players[self.big_blind_holder]
 
     @property
-    def small_blind_player(self) -> PotPlayer:
+    def small_blind_player(self) -> Player:
         return self.players[self.small_blind_holder]
     
     @property
-    def dealer_player(self) -> PotPlayer:
+    def dealer_player(self) -> Player:
         return self.players[self.dealer_index]
         
     @property
-    def players(self) -> List[PotPlayer]:
+    def players(self) -> List[Player]:
         return self.__players    

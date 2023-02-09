@@ -1,11 +1,11 @@
 import random
 from typing import List
 
-from game.player_action import PlayerAction
-from game.player_action_type import PlayerActionType
-from game.pot_player import PotPlayer
+from game.player.player_action import PlayerAction
+from game.player.player_action_type import PlayerActionType
+from game.player.player import Player
 
-class MockChooseAction:
+class ChooseActionFactory:
     
     @staticmethod
     def create_choose_action_predetermined(actions: List[(PlayerAction)]):
@@ -17,7 +17,7 @@ class MockChooseAction:
             
         action_index = 0
             
-        def mock_choose_action(self: PotPlayer, possible_actions: List[PlayerActionType], call_amount: float):
+        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], call_amount: float):
             nonlocal action_index     
             predetermined_action = actions[action_index]
             
@@ -28,7 +28,7 @@ class MockChooseAction:
         return mock_choose_action
 
     @staticmethod
-    def mock_choose_action_always_raise_if_possible(self: PotPlayer, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
+    def mock_choose_action_always_raise_if_possible(self: Player, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
         action_type: PlayerActionType = None
         
         if PlayerActionType.RAISE in possible_actions:        

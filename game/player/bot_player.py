@@ -1,9 +1,9 @@
 from typing import List
-from game.player_action_type import PlayerActionType
-from game.pot_player import PotPlayer
+from game.player.player_action_type import PlayerActionType
+from game.player.player import Player
 from game.user import User
 
-class MockPlayer(PotPlayer):
+class BotPlayer(Player):
     
     def __init__(self, user: User, mock_choose_action, stake:float = 0) -> None:
         super().__init__(user)

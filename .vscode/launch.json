@@ -11,10 +11,7 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
-            "envFile": "D:\\Материали от унито\\Трети семестър\\Python-Project\\.env"
-            // "cwd": "D:\\Материали от унито\\Трети семестър\\Python-Project"
+            "envFile": "D:\\Материали от унито\\Трети семестър\\Python-Project\\.env.txt"
         },
     ],
 }
-
-// .env
