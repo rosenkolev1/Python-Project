@@ -1,11 +1,15 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING, List
 
-from typing import List
 from game.player.player import Player
+from game.player.player_action import PlayerAction
 from game.player.player_action_type import PlayerActionType
+from game.pot import Pot
 
+if TYPE_CHECKING:
+    from game.game import Game
 
 class GameUI:
-    
     PLAYER_COMMAND_ACTION_MAP = {
         "fold": PlayerActionType.FOLD,
         "check": PlayerActionType.CHECK,
@@ -18,6 +22,104 @@ class GameUI:
     INVALID_COMMAND: str = "\nThe given command is invalid, try again!\n"
 
     INVALID_COMMAND_MISSING_AMOUNT_ARGUMENT = "\nThe given command is invalid because you have not specified an amount!\n"
+
+    GAME_STARTING_INFO_PROMPT = "Game is starting...\n"
+
+    GAME_ENDING_INFO_PROMPT = "Game has ended...\n\n"
+
+    SHOWDOWN_STARTING_INFO_PROMPT = f"Showdown is starting...\n"
+
+    @staticmethod
+    def dealer_info_prompt(game: Game) -> str:
+        return f"The dealer is: {game.dealer_player.user.name}"
+
+    @staticmethod
+    def small_blind_player_info_prompt(game: Game) -> str:
+        return f"The small blind player is: {game.small_blind_player.user.name}"
+
+    @staticmethod
+    def big_blind_player_info_prompt(game: Game) -> str:
+        return f"The big blind player is: {game.big_blind_player.user.name}\n"
+
+    @staticmethod
+    def players_list_info_prompt(game: Game) -> str:
+        return f"The players, starting from the dealer, are: {' --> '.join(map(lambda p: p.user.name, game.players))}\n"
+    
+    @staticmethod
+    def small_blind_entered_info_prompt(game: Game) -> str:
+        return f"Player: {game.small_blind_player.user.name} is entering the small blind amount of {game.small_blind_bet}! Their current balance is {game.small_blind_player.user.money}"
+
+    @staticmethod
+    def big_blind_entered_info_prompt(game: Game) -> str:
+        return f"Player: {game.big_blind_player.user.name} is entering the big blind amount of {game.big_blind_bet}! Their current balance is {game.big_blind_player.user.money}\n" 
+
+    @staticmethod
+    def player_dealt_cards_info_prompt(player: Player) -> str:
+        return f"Player: {player.user.name} has been dealt these cards: {player.cards}"
+
+    @staticmethod
+    def flop_dealing_cards_from_deck_info_prompt(game: Game) -> str:
+        return f"During the {game.round.value} round these cards were dealt: {game.community_cards}\n"
+
+    @staticmethod
+    def dealing_cards_from_deck_turn_river_info_prompt(game: Game) -> str:
+        return f"During the {game.round.value}, these were the cards: {game.community_cards}\n"
+
+    @staticmethod
+    def round_starting_info_prompt(game: Game) -> str:
+        return f"{game.round} is starting...\n"
+
+    @staticmethod
+    def player_raising_info_prompt(player: Player, action: PlayerAction, call_amount: float) -> str:
+        return f"Player: {player.user.name} is doing {action.type.name} by amount {action.amount - call_amount}$! Their current balance is {player.user.money}$\n"
+
+    @staticmethod
+    def player_bet_or_call_info_prompt(player: Player, action: PlayerAction) -> str:
+        return f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount}$! Their current balance is {player.user.money}$\n"
+
+    @staticmethod
+    def player_fold_info_prompt(player: Player) -> str:
+        return f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n"
+
+    @staticmethod
+    def player_all_in_info_prompt(player: Player, action: PlayerAction) -> str:
+        return f"Player: {player.user.name} is all-in with {action.amount}$! Their current balance is {player.user.money}$\n"
+
+    @staticmethod
+    def player_check_info_prompt(player: Player):
+        return f"Player: {player.user.name} has checked! Their current balance is {player.user.money}\n"
+
+    @staticmethod
+    def community_cards_info_prompt(game: Game) -> str:
+        return f"Community cards: {game.community_cards}\n"
+
+    @staticmethod
+    def pot_winners_tied_info_prompt(game: Game, all_winners: List[Player], pot: Pot) -> str:
+        return f"Players: {', '.join(map(lambda x: x.user.name, all_winners))} are tied winners for Pot #{game.pot_number(pot)}\n"
+
+    @staticmethod
+    def pot_single_winner_claim_winnings_info_prompt(game: Game, winning_player: Player, amount_won: float,  pot: Pot) -> str:
+        return f"Player: {winning_player.user.name} has won Pot #{game.pot_number(pot)} and claimed {amount_won}$ from the pot\n"
+
+    @staticmethod
+    def pot_tied_winners_claim_split_winnings_info_prompt(winning_player: Player, amount_won: float) -> str:
+        return f"Player: {winning_player.user.name} has claimed {amount_won}$ from the pot\n"
+
+    @staticmethod
+    def resolving_pot_info_prompt(game: Game, pot: Pot) -> str:
+        return f"Resolving Pot #{game.pot_number(pot)} -- Money in pot: {pot.total_money}$\n"
+
+    @staticmethod
+    def resolving_pot_players_list_info_prompt(players_not_folded: List[Player]) -> str:
+        return f"Players: {', '.join(map(lambda x: x.user.name, players_not_folded))}\n"
+
+    @staticmethod
+    def player_hand_info_prompt(player: Player) -> str:
+        return f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n"
+
+    @staticmethod
+    def round_over_line_separator(game: Game) -> str:
+        return f"{game.round} is over...\n{'-'.join(['']*100)}\n"
 
     @staticmethod
     def action_command_prompt(player: Player, action: PlayerActionType, call_amount: float):

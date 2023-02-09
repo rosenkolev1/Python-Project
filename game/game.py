@@ -12,6 +12,7 @@ from game.deck.deck import Deck
 from game.game_round import GameRound
 from game.pot import Pot
 from game.user import User
+from game.user_interface.game_ui import GameUI
 
 class Game:
 
@@ -47,34 +48,30 @@ class Game:
             self.small_blind_holder = 0
             self.big_blind_holder = 1
 
-        print(f"The dealer is: {self.dealer_player.user.name}")
-        print(f"The small blind player is: {self.small_blind_player.user.name}")
-        print(f"The big blind player is: {self.big_blind_player.user.name}\n")
-        
-        print(f"The players, starting from the dealer, are: {' --> '.join(map(lambda p: p.user.name, self.players))}\n")
+        print(GameUI.dealer_info_prompt(self))
+        print(GameUI.small_blind_player_info_prompt(self))
+        print(GameUI.big_blind_player_info_prompt(self))
+        print(GameUI.players_list_info_prompt(self))
         
         main_pot: Pot = Pot()
 
         main_pot.place_bet(self.small_blind_player, self.small_blind_bet)
         main_pot.place_bet(self.big_blind_player, self.big_blind_bet)
         
-        #Debug
-        print(f"Player: {self.small_blind_player.user.name} is entering the small blind amount of {self.small_blind_bet}! Their current balance is {self.small_blind_player.user.money}")
-        print(f"Player: {self.big_blind_player.user.name} is entering the big blind amount of {self.big_blind_bet}! Their current balance is {self.big_blind_player.user.money}\n")
+        print(GameUI.small_blind_entered_info_prompt(self))
+        print(GameUI.big_blind_entered_info_prompt(self))
 
         self.pots.append(main_pot)
         self.current_pot_index = 0
 
-        #Debug
-        print(f"Game is starting...\n")
+        print(GameUI.GAME_STARTING_INFO_PROMPT)
             
         #Shuffle deck
         self.deck.shuffle_deck()
 
         self.play_round()
 
-        #Debug
-        print(f"Game has ended...\n\n")
+        print(GameUI.GAME_ENDING_INFO_PROMPT)
 
     def _validate_money_for_big_blind_bet(self, money: float) -> None:
         if money < self.big_blind_bet:
@@ -130,9 +127,8 @@ class Game:
             for player in self.players:
                 player.cards.append(self.deck.cards.pop())
             
-        #Debug
         for player in self.players: 
-            print(f"Player: {player.user.name} has drawn cards: {player.cards}")
+            print(GameUI.player_dealt_cards_info_prompt(player))
             
         print()
 
@@ -142,16 +138,14 @@ class Game:
         for i in range(0, 3):
             self.community_cards.append(self.deck.cards.pop())
 
-        #Debug
-        print(f"During the {self.round.value} round these cards were drawn: {self.community_cards}\n")
+        print(GameUI.flop_dealing_cards_from_deck_info_prompt(self))
         
     def _deal_turn_or_river(self):
         self.deck.cards.pop()
         
         self.community_cards.append(self.deck.cards.pop())
 
-        #Debug
-        print(f"During the {self.round.value}, these were the cards: {self.community_cards}\n")
+        print(GameUI.dealing_cards_from_deck_turn_river_info_prompt(self))
 
     def deal_cards(self):
         if self.round == GameRound.Pre_Flop:
@@ -169,8 +163,7 @@ class Game:
             self.next_round()        
 
     def start_round(self): 
-        #Debug
-        print(f"{self.round} is starting...\n")
+        print(GameUI.round_starting_info_prompt(self))
 
         #Set the current highest stake for the current pot for this round to 0 to reset it
         if (self.round != GameRound.Pre_Flop):
@@ -241,12 +234,14 @@ class Game:
         
         #This should normally be impossible, but just in case
         if player.is_all_in:
+            pass
             #Debug
-            print(f"Player: {player.user.name} is all in with amount {pot.get_stake_for_player(player)}! Their current balance is {player.user.money}\n")
+            # print(f"Player: {player.user.name} is all in with amount {pot.get_stake_for_player(player)}! Their current balance is {player.user.money}\n")
         #This should normally be impossible, but just in case
         elif player.has_folded:
+            pass
             #Debug
-            print(f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n")
+            # print(f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n")
         else:
             #Determine the possible actions
             possible_actions, call_amount = self.get_possible_actions(player, pot)
@@ -269,21 +264,17 @@ class Game:
                 
                 #In this case, we are not all-in
                 if not is_all_in:
-                    #Debug
                     if action.type == PlayerActionType.RAISE:
-                        print(f"Player: {player.user.name} is doing {action.type.name} by amount {action.amount - call_amount}$! Their current balance is {player.user.money}$\n")
+                        print(GameUI.player_raising_info_prompt(player, action, call_amount))
                     else:
-                        print(f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount}$! Their current balance is {player.user.money}$\n")
+                        print(GameUI.player_bet_or_call_info_prompt(player, action))
                 else:
-                    #Debug
-                    print(f"Player: {player.user.name} is going all-in with {action.amount}$! Their current balance is {player.user.money}$\n")
+                    print(GameUI.player_all_in_info_prompt(player, action))
                     
             elif action.type == PlayerActionType.FOLD:
-                #Debug
-                print(f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n")
+                print(GameUI.player_fold_info_prompt(player))
             elif action.type == PlayerActionType.CHECK:
-                #Debug
-                print(f"Player: {player.user.name} has checked! Their current balance is {player.user.money}\n")
+                print(GameUI.player_check_info_prompt(player))
 
         player.has_played_turn = True
         
@@ -299,11 +290,9 @@ class Game:
         return False       
 
     def play_showdown(self):
-        #Debug
-        print(f"Showdown is starting...\n")
+        print(GameUI.SHOWDOWN_STARTING_INFO_PROMPT)
         
-        #Debug
-        print(f"Community cards: {self.community_cards}\n")
+        print(GameUI.community_cards_info_prompt(self))
         
         self.payout()
 
@@ -336,19 +325,17 @@ class Game:
         has_single_winner = len(all_winners) == 1
         per_player_winnings: float = pot.total_money / len(all_winners)
 
-        #Debug
         if not has_single_winner:
-            print(f"Players: {', '.join(map(lambda x: x.user.name, all_winners))} are tied winners for Pot #{self.pot_number(pot)}\n")
+            print(GameUI.pot_winners_tied_info_prompt(self, all_winners, pot))
 
         for winning_player in all_winners:
             
             winning_player.user.money += per_player_winnings
             
-            #Debug
             if has_single_winner:
-                print(f"Player: {winning_player.user.name} has won Pot #{self.pot_number(pot)} and claimed {per_player_winnings}$ from the pot\n")
+                print(GameUI.pot_single_winner_claim_winnings_info_prompt(self, winning_player, per_player_winnings, pot))
             else:
-                print(f"Player: {winning_player.user.name} has claimed {per_player_winnings}$ from the pot\n")
+                print(GameUI.pot_tied_winners_claim_split_winnings_info_prompt(winning_player, per_player_winnings))
 
     def payout(self) -> None:
         unnecessary_pots_filter = lambda pot: len(pot.players) == 1 or pot.total_money == 0
@@ -367,20 +354,18 @@ class Game:
         filtered_pots.reverse()
         
         for pot in filtered_pots:
-            #Debug
-            print(f"Resolving Pot #{self.pot_number(pot)} -- Money in pot: {pot.total_money}$\n")
+            print(GameUI.resolving_pot_info_prompt(self, pot))
             
             players_not_folded = pot.get_players_not_folded()
             
-            #Debug
-            print(f"Players: {', '.join(map(lambda x: x.user.name, players_not_folded))}\n")                
+            print(GameUI.resolving_pot_players_list_info_prompt(players_not_folded))                
             
             #In this case, we have all 5 community cards needed to calculate the best cards, because there are at least 2 people who got to showdown round
             if len(players_not_folded) > 1:
                 for player in players_not_folded:
                     self.calc_best_hand(player)   
                     
-                    print(f"Player: {player.user.name}\nCards: {player.cards}\nBest Hand: {player.best_hand}\nCombination:{player.best_hand.combination.name}\n")
+                    print(GameUI.player_hand_info_prompt(player))
                    
                 #Order the players by their hand strengths
                 ordered_players: List[Player] = sorted(players_not_folded, key=lambda p: functools.cmp_to_key(Hand.compare_hands)(p.best_hand))
@@ -455,8 +440,7 @@ class Game:
                 break
 
     def next_round(self):
-        #Debug
-        print(f"{self.round} is over...\n{'-'.join(['']*100)}\n")
+        print(GameUI.round_over_line_separator(self))
         self.round = self.round.next_round()
 
     @property
