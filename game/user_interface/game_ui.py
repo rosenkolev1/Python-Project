@@ -43,7 +43,15 @@ class GameUI:
 
     @staticmethod
     def players_list_info_prompt(game: Game) -> str:
-        return f"The players, starting from the dealer, are: {' --> '.join(map(lambda p: p.user.name, game.players))}\n"
+        players: List[Player] = []
+
+        for i in range(game.dealer_index, len(game.players)):
+            players.append(game.players[i])
+
+        for i in range(0, game.dealer_index):
+            players.append(game.players[i])
+
+        return f"The players, starting from the dealer, are: {' --> '.join(map(lambda p: p.user.name, players))}\n"
     
     @staticmethod
     def small_blind_entered_info_prompt(game: Game) -> str:

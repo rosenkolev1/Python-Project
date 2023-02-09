@@ -9,5 +9,8 @@ class BotPlayer(Player):
         super().__init__(user)
         self.choose_action_preset = choose_action    
 
+    def predefine_choose_action(self, new_choose_action):
+        self.choose_action_preset = new_choose_action
+
     def choose_action(self, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
         return self.choose_action_preset(self, possible_actions, call_amount)

@@ -24,27 +24,25 @@ class Game:
         self.community_cards: List[Card] = []
 
         self.turn: int = 0
-        self.dealer_index: int = -1
+        self.dealer_index: int = 0
 
         self.pots: List[Pot] = []
         self.current_pot_index: int = 0 
 
         self.small_blind_bet: float = small_blind_bet
-        self.small_blind_holder: int = 0
+        self.small_blind_holder: int = 1
 
         self.big_blind_bet: float = big_blind_bet
-        self.big_blind_holder: int = 1 
+        self.big_blind_holder: int = 2
+
+        self.table = None
 
     def start_game(self):
         self.round = GameRound.Pre_Flop
 
-        self.next_dealer()
-        self.next_small_blind_holder()
-        self.next_big_blind_holder()
-
         self.pots.clear()
 
-        if self.two_player_game:
+        if self.is_two_player_game and self.table is None:
             self.small_blind_holder = 0
             self.big_blind_holder = 1
 
@@ -77,18 +75,10 @@ class Game:
         if money < self.big_blind_bet:
             raise ValueError("The player that you are trying to add has less money than required to enter the game!")
         
-    @dispatch(Player)
     def add_player(self, player: Player) -> None:
         self._validate_money_for_big_blind_bet(player.user.money)
 
         self.players.append(player)
-        self.two_player_game = len(self.players) == 2
-
-    @dispatch(User)
-    def add_player(self, user: User) -> None:
-        self._validate_money_for_big_blind_bet(user.money)
-
-        self.players.append(Player(user))
         self.two_player_game = len(self.players) == 2
 
     def pot_number(self, pot: Pot) -> int:
@@ -104,15 +94,6 @@ class Game:
 
     def next_pot(self) -> None:
         self.current_pot_index = self.__next_index(self.current_pot_index)
-
-    def next_big_blind_holder(self) -> None:
-        self.big_blind_holder = self.__next_index(self.big_blind_holder)
-
-    def next_small_blind_holder(self) -> None:
-        self.small_blind_holder = self.__next_index(self.small_blind_holder)
-
-    def next_dealer(self) -> None:
-        self.dealer_index = self.__next_index(self.dealer_index)
 
     def next_turn(self) -> None:
         while True:

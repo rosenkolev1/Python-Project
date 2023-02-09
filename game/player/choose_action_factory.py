@@ -55,12 +55,14 @@ class ChooseActionFactory:
             nonlocal action_index     
             predetermined_action = actions[action_index]
             
+            amount: float = predetermined_action.amount
+
             if predetermined_action.type == PlayerActionType.RAISE:
-                predetermined_action.amount += call_amount
+                amount += call_amount
 
             action_index += 1
             
-            return predetermined_action
+            return PlayerAction(predetermined_action.type, amount)
         
         return mock_choose_action
 
