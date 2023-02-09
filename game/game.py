@@ -254,7 +254,7 @@ class Game:
             action: PlayerAction = player.choose_action(possible_actions, call_amount)
 
             is_all_in: bool = action.type == PlayerActionType.ALL_IN
-            is_all_in_and_raise: bool = is_all_in and action.amount > pot.current_highest_stake
+            is_all_in_and_raise: bool = is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake
 
             if action.type == PlayerActionType.FOLD:
                 player.has_folded = True
@@ -271,7 +271,7 @@ class Game:
                 if not is_all_in:
                     #Debug
                     if action.type == PlayerActionType.RAISE:
-                        print(f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount - call_amount}$! Their current balance is {player.user.money}$\n")
+                        print(f"Player: {player.user.name} is doing {action.type.name} by amount {action.amount - call_amount}$! Their current balance is {player.user.money}$\n")
                     else:
                         print(f"Player: {player.user.name} is doing {action.type.name} with amount {action.amount}$! Their current balance is {player.user.money}$\n")
                 else:
