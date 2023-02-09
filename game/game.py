@@ -94,6 +94,9 @@ class Game:
         self.players.append(Player(user))
         self.two_player_game = len(self.players) == 2
 
+    def pot_number(self, pot: Pot) -> int:
+        return self.pots.index(pot) + 1
+
     def __next_index(self, indexer: int) -> int:
         indexer += 1
 
@@ -140,7 +143,7 @@ class Game:
             self.community_cards.append(self.deck.cards.pop())
 
         #Debug
-        print(f"During the flop round these cards were drawn: {self.community_cards}\n")
+        print(f"During the {self.round.value} round these cards were drawn: {self.community_cards}\n")
         
     def _deal_turn_or_river(self):
         self.deck.cards.pop()
@@ -148,7 +151,7 @@ class Game:
         self.community_cards.append(self.deck.cards.pop())
 
         #Debug
-        print(f"During the turn(4th street) round or the River round, these were the cards: {self.community_cards}\n")
+        print(f"During the {self.round.value}, these were the cards: {self.community_cards}\n")
 
     def deal_cards(self):
         if self.round == GameRound.Pre_Flop:
@@ -198,14 +201,18 @@ class Game:
             possible_actions.append(PlayerActionType.FOLD)
             stake = pot.get_stake_for_player(player)
 
-            #In this case, there has been a bet this round already
-            if stake != pot.current_highest_stake:
+            #In this case, there has been a bet this round already (big blind during pre-flop counts as a bet)
+            if 0 != pot.current_highest_stake:
                 possible_actions.append(PlayerActionType.CALL)
 
                 highest_stake_diff: float = pot.current_highest_stake - stake
                 call_amount: float = min(highest_stake_diff, player.user.money)
 
-                can_raise: bool = highest_stake_diff <= player.user.money and any(map(lambda x: x != player and not x.is_all_in, pot.players))
+                #This happens at the start of the new rounds, i.e. when there is not bet to call on
+                if call_amount < 0:
+                    call_amount = 0
+
+                can_raise: bool = highest_stake_diff < player.user.money and any(map(lambda x: x != player and not x.is_all_in, pot.players))
 
                 if can_raise:
                     possible_actions.append(PlayerActionType.RAISE)
@@ -320,7 +327,7 @@ class Game:
 
         #Debug
         if not has_single_winner:
-            print(f"Players: {', '.join(map(lambda x: x.user.name, all_winners))} are tied winners for Pot #{self.pots.index(pot)}\n")
+            print(f"Players: {', '.join(map(lambda x: x.user.name, all_winners))} are tied winners for Pot #{self.pot_number(pot)}\n")
 
         for winning_player in all_winners:
             
@@ -328,7 +335,7 @@ class Game:
             
             #Debug
             if has_single_winner:
-                print(f"Player: {winning_player.user.name} has won Pot #{self.pots.index(pot)} and claimed {per_player_winnings}$ from the pot\n")
+                print(f"Player: {winning_player.user.name} has won Pot #{self.pot_number(pot)} and claimed {per_player_winnings}$ from the pot\n")
             else:
                 print(f"Player: {winning_player.user.name} has claimed {per_player_winnings}$ from the pot\n")
 
@@ -350,7 +357,7 @@ class Game:
         
         for pot in filtered_pots:
             #Debug
-            print(f"Resolving Pot #{self.pots.index(pot)} -- Money in pot: {pot.total_money}$\n")
+            print(f"Resolving Pot #{self.pot_number(pot)} -- Money in pot: {pot.total_money}$\n")
             
             players_not_folded = pot.get_players_not_folded()
             
