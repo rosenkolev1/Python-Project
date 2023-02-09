@@ -13,14 +13,21 @@ class ChooseActionFactory:
     def create_choose_action_predetermined_human_player(actions: List[(PlayerAction)]):
         action_index = 0
             
-        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], call_amount: float):
+        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], call_amount: float,
+                               original_choose_action, original_receive_input):
             nonlocal action_index     
+
+            #If we have run out of predetermined moves, then give back control to the user
+            if action_index >= len(actions):
+                self.receive_input = original_receive_input
+
+                return original_choose_action(possible_actions, call_amount)
+
             predetermined_action = actions[action_index]
             
-            predetermined_action_command_string = GameUI.PLAYER_COMMAND_ACTION_MAP.fromkeys(
-                GameUI.PLAYER_COMMAND_ACTION_MAP.values(),
-                GameUI.PLAYER_COMMAND_ACTION_MAP.keys
-            )[predetermined_action.type]
+            predetermined_action_command_string = (
+                {v: k for k, v in GameUI.PLAYER_COMMAND_ACTION_MAP.items()}[predetermined_action.type]
+            )
 
             predetermined_action_amount_string = str(predetermined_action.amount) 
 
@@ -32,9 +39,11 @@ class ChooseActionFactory:
                 print(GameUI.choose_actions_command_prompt(self, possible_actions, call_amount))
                 return predetermined_action_string
 
+            #Replace the receive_input function so that it gives us the appropriate preset input
             self.receive_input = fake_receive_input
 
-            return self.choose_action(possible_actions, call_amount)
+            #Call the original choose_action function which now has the fake_receive_input
+            return original_choose_action(possible_actions, call_amount)
         
         return mock_choose_action
 
@@ -46,6 +55,9 @@ class ChooseActionFactory:
             nonlocal action_index     
             predetermined_action = actions[action_index]
             
+            if predetermined_action.type == PlayerActionType.RAISE:
+                predetermined_action.amount += call_amount
+
             action_index += 1
             
             return predetermined_action

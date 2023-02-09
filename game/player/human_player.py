@@ -25,6 +25,13 @@ class HumanPlayer(Player):
 
         return command, amount
 
+    def predefine_choose_action(self, new_choose_action):
+        original_choose_action = self.choose_action
+        original_receive_input = self.receive_input
+
+        self.choose_action = lambda possible_actions, call_amount: new_choose_action(
+            self, possible_actions, call_amount, original_choose_action, original_receive_input)
+            
     def choose_action(self, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
         while True:
             text_input: str = self.receive_input(possible_actions, call_amount)
