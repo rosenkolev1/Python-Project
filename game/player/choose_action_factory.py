@@ -1,20 +1,45 @@
 import random
 from typing import List
+from game.player.human_player import HumanPlayer
 
 from game.player.player_action import PlayerAction
 from game.player.player_action_type import PlayerActionType
 from game.player.player import Player
+from game.user_interface.game_ui import GameUI
 
 class ChooseActionFactory:
-    
+
+    @staticmethod
+    def create_choose_action_predetermined_human_player(actions: List[(PlayerAction)]):
+        action_index = 0
+            
+        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], call_amount: float):
+            nonlocal action_index     
+            predetermined_action = actions[action_index]
+            
+            predetermined_action_command_string = GameUI.PLAYER_COMMAND_ACTION_MAP.fromkeys(
+                GameUI.PLAYER_COMMAND_ACTION_MAP.values(),
+                GameUI.PLAYER_COMMAND_ACTION_MAP.keys
+            )[predetermined_action.type]
+
+            predetermined_action_amount_string = str(predetermined_action.amount) 
+
+            predetermined_action_string = predetermined_action_command_string + " " + predetermined_action_amount_string
+
+            action_index += 1
+
+            def fake_receive_input(*args, **kwargs) -> str:
+                print(GameUI.choose_actions_command_prompt(self, possible_actions, call_amount))
+                return predetermined_action_string
+
+            self.receive_input = fake_receive_input
+
+            return self.choose_action(possible_actions, call_amount)
+        
+        return mock_choose_action
+
     @staticmethod
     def create_choose_action_predetermined(actions: List[(PlayerAction)]):
-        sample = []
-        
-        def inner_mean(number):
-            sample.append(number)
-            return sum(sample) / len(sample)
-            
         action_index = 0
             
         def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], call_amount: float):
@@ -26,6 +51,19 @@ class ChooseActionFactory:
             return predetermined_action
         
         return mock_choose_action
+
+    @staticmethod
+    def choose_action_always_random(self: Player, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
+        #Choose randomly
+        action_type: PlayerActionType = possible_actions[random.randint(0, len(possible_actions) - 1)]
+        amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+
+        if action_type == PlayerActionType.CALL:
+            amount = call_amount
+        elif action_type == PlayerActionType.ALL_IN:
+            amount = self.user.money
+
+        return PlayerAction(action_type, amount)
 
     @staticmethod
     def choose_action_always_raise_if_possible(self: Player, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:

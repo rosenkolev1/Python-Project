@@ -5,9 +5,9 @@ from game.user import User
 
 class BotPlayer(Player):
     
-    def __init__(self, user: User, mock_choose_action) -> None:
+    def __init__(self, user: User, choose_action) -> None:
         super().__init__(user)
-        self.mock_choose_action = mock_choose_action    
+        self.choose_action_preset = choose_action    
 
     def choose_action(self, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
-        return self.mock_choose_action(self, possible_actions, call_amount)
+        return self.choose_action_preset(self, possible_actions, call_amount)

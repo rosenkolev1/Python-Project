@@ -1,70 +1,65 @@
-from typing import List
+from typing import List, Tuple
 from game.player.player_action import PlayerAction
 from game.player.player_action_type import PlayerActionType
 from game.player.player import Player
 from game.user import User
+from game.user_interface.game_ui import GameUI
 
 class HumanPlayer(Player):
     
     def __init__(self, user: User) -> None:
         super().__init__(user)
 
-    def action_command_prompt(self, action: PlayerActionType, call_amount: float):
-        if action == PlayerActionType.FOLD:
-            return "Fold"
-        elif action == PlayerActionType.CHECK:
-            return "Check"
-        elif action == PlayerActionType.RAISE:
-            return "Raise <amount-raise>"
-        elif action == PlayerActionType.BET:
-            return"Bet <amount-bet>"
-        elif action == PlayerActionType.ALL_IN:
-            return f"All-in {self.user.money}$"
-        elif action == PlayerActionType.CALL:
-            return f"Call {call_amount}$"
-            
-        raise ValueError("Invalid action command!")
+    def receive_input(self, possible_actions: List[PlayerActionType], call_amount: float) -> str:
+        return input(GameUI.choose_actions_command_prompt(self, possible_actions, call_amount))
 
-    def choose_actions_command_prompt(self, actions: List[PlayerActionType], call_amount: float) -> str:
-        sorted_actions = sorted(actions, key=lambda x: x.value)
-        action_strings: List[str] = []
+    def get_command_and_amount(self, text_input: str) -> Tuple[str, float]:
+        input_args: List[str] = text_input.split()
 
-        for action in sorted_actions:
-            action_str = self.action_command_prompt(action, call_amount)
-            action_strings.append(action_str)
+        command: str = input_args[0]
+        
+        try:
+            amount: float = float(input_args[1]) if len(input_args) > 1 else None
+        except ValueError:
+            return "", None
 
-        res = f"Choose an action ({' | '.join(action_strings)}): "
-        return res
+        return command, amount
 
     def choose_action(self, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
         while True:
-            human_input: str = input(self.choose_actions_command_prompt(possible_actions, call_amount))
-            input_args: List[str] = human_input.split()
+            text_input: str = self.receive_input(possible_actions, call_amount)
 
-            command: str = input_args[0]
-            amount: float = float(input_args[1]) if len(input_args) > 1 else None
+            command, amount = self.get_command_and_amount(text_input)
 
-            if command.lower() == PlayerActionType.FOLD.value.lower():
-                return PlayerAction(PlayerActionType.FOLD, 0)
+            chosen_action: PlayerActionType = GameUI.PLAYER_COMMAND_ACTION_MAP.get(command.lower())
 
-            elif command.lower() == PlayerActionType.CHECK.value.lower():
-                return PlayerAction(PlayerActionType.CHECK, 0)
+            if chosen_action is None or chosen_action not in possible_actions:
+                print(GameUI.INVALID_COMMAND)
+                continue
 
-            elif command.lower() == PlayerActionType.RAISE.value.lower():
+            if chosen_action == PlayerActionType.RAISE:
+                if amount is None:
+                    print(GameUI.INVALID_COMMAND_MISSING_AMOUNT_ARGUMENT)
+                    continue
+
                 amount= min(call_amount + amount, self.user.money)
 
                 return PlayerAction(PlayerActionType.RAISE, amount)
 
-            elif command.lower() == PlayerActionType.BET.value.lower():
+            elif chosen_action == PlayerActionType.BET:
+                if amount is None:
+                    print(GameUI.INVALID_COMMAND_MISSING_AMOUNT_ARGUMENT)
+                    continue
+
                 amount = min(amount, self.user.money)
 
                 return PlayerAction(PlayerActionType.BET, amount)
 
-            elif command.lower() == PlayerActionType.ALL_IN.value.lower():
+            elif chosen_action == PlayerActionType.ALL_IN:
                 return PlayerAction(PlayerActionType.ALL_IN, self.user.money)
 
-            elif command.lower() == PlayerActionType.CALL.value.lower():
+            elif chosen_action == PlayerActionType.CALL:
                 return PlayerAction(PlayerActionType.CALL, call_amount)
 
             else:
-                print("\nThe given command is invalid, try again!\n")
+                return PlayerAction(chosen_action, 0)
