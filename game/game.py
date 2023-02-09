@@ -310,13 +310,27 @@ class Game:
             self.calc_best_hand(player)
 
     def payout_winner(self, pot: Pot, ordered_players: List[Player]):
-        winning_player: Player = ordered_players[-1]
-        total_winnings = pot.total_money
-        
-        winning_player.user.money += total_winnings
-        
+        all_winners: List[Player] = list(filter(
+            lambda player: Hand.compare_hands(player.best_hand, ordered_players[-1].best_hand) == 0, 
+            ordered_players)) if len(ordered_players) != 1 else ordered_players
+
+        #Split the prize between all the winning players
+        has_single_winner = len(all_winners) == 1
+        per_player_winnings: float = pot.total_money / len(all_winners)
+
         #Debug
-        print(f"Player: {winning_player.user.name} has won Pot #{self.pots.index(pot)} and claimed {total_winnings}$ from the pot\n")
+        if not has_single_winner:
+            print(f"Players: {', '.join(map(lambda x: x.user.name, all_winners))} are tied winners for Pot #{self.pots.index(pot)}\n")
+
+        for winning_player in all_winners:
+            
+            winning_player.user.money += per_player_winnings
+            
+            #Debug
+            if has_single_winner:
+                print(f"Player: {winning_player.user.name} has won Pot #{self.pots.index(pot)} and claimed {per_player_winnings}$ from the pot\n")
+            else:
+                print(f"Player: {winning_player.user.name} has claimed {per_player_winnings}$ from the pot\n")
 
     def payout(self) -> None:
         unnecessary_pots_filter = lambda pot: len(pot.players) == 1 or pot.total_money == 0
