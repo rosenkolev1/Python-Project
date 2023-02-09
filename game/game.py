@@ -225,8 +225,6 @@ class Game:
         player = self.current_player
         pot = self.current_pot
         
-        # players_that_can_play_other_than_current_player: List[Player] = [p for p in self.current_pot.get_players_not_folded_and_not_all_in() if p != player]
-
         #This should normally be impossible, but just in case
         if player.is_all_in:
             #Debug
@@ -235,9 +233,6 @@ class Game:
         elif player.has_folded:
             #Debug
             print(f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n")
-        # elif len(players_that_can_play_other_than_current_player) == 0 and player.has_played_turn:
-        #     #DEBUG, in this case, the current player cannot play anything and the round should be over
-        #     print("asdsadsasasdfdjkasdksakdsahdsadsahdskasdjasdkja")
         else:
             #Determine the possible actions
             possible_actions, call_amount = self.get_possible_actions(player, pot)
@@ -324,10 +319,22 @@ class Game:
         print(f"Player: {winning_player.user.name} has won Pot #{self.pots.index(pot)} and claimed {total_winnings}$ from the pot\n")
 
     def payout(self) -> None:
+        unnecessary_pots_filter = lambda pot: len(pot.players) == 1 or pot.total_money == 0
+
+        #Payout the money from the unnecessary pots silently(without showing it in the UI)
+        unnecessary_pots: List[Pot] = list(filter(unnecessary_pots_filter, self.pots))
+
+        for pot in unnecessary_pots:
+            if pot.total_money != 0:
+                pot.players[0].user.money += pot.total_money
+
+        #Remove the unnecessary pots with only one player or with no money in them
+        filtered_pots: List[Pot] = list(filter(lambda pot: not unnecessary_pots_filter(pot), self.pots))
+
         #Reverse the pots, because we need to start from the most recent side pot and then move down the main pot
-        self.pots.reverse()
+        filtered_pots.reverse()
         
-        for pot in self.pots:
+        for pot in filtered_pots:
             #Debug
             print(f"Resolving Pot #{self.pots.index(pot)} -- Money in pot: {pot.total_money}$\n")
             

@@ -30,17 +30,20 @@ class Pot:
         player.user.money -= amount
 
     def bet_is_matched_all(self) -> bool:
-        for pot_player in self.players:
-            stake = self.get_stake_for_player(pot_player)
+        for player in self.players:
+            stake = self.get_stake_for_player(player)
 
-            if not pot_player.has_folded and (not pot_player.has_played_turn or stake != self.current_highest_stake):
+            if not player.has_folded and (not player.has_played_turn or stake != self.current_highest_stake):
                 return False
 
         return True
 
     def should_be_split(self) -> bool:
-        players_all_in = map(lambda pot_player: pot_player.is_all_in, self.players)
+        players_all_in: List[Player] = list(map(lambda player: player.is_all_in, self.get_players_not_folded()))
+
+        players_not_all_in: List[Player] = list(map(lambda player: not player.is_all_in, self.get_players_not_folded()))
         
+        # return any(players_all_in) and not all(players_all_in) and len(players_not_all_in) > 2
         return any(players_all_in) and not all(players_all_in)
 
     def all_players_have_folded(self) -> bool:
@@ -50,21 +53,18 @@ class Pot:
         return len(self.get_players_not_played()) > 0
     
     def all_players_are_all_in(self) -> bool:
-        players_all_in = map(lambda pot_player: pot_player.is_all_in, self.players)
+        players_all_in: List[Player] = list(map(lambda player: player.is_all_in, self.players))
         
         return all(players_all_in)
 
     def get_players_have_played(self) -> List[Player]:
-        return [pot_player for pot_player in self.players if pot_player.has_played_turn]
+        return [player for player in self.players if player.has_played_turn]
 
     def get_players_not_played(self) -> List[Player]:
-        return [pot_player for pot_player in self.players if pot_player.has_played_turn == False]
+        return [player for player in self.players if player.has_played_turn == False]
 
     def get_players_not_folded(self) -> List[Player]:
-        return [pot_player for pot_player in self.players if not pot_player.has_folded]
-    
-    # def get_players_not_folded(self) -> List[Player]:
-    #     return [pot_player for pot_player in self.players if not pot_player.has_folded]
+        return [player for player in self.players if not player.has_folded]
     
     def get_players_not_folded_and_not_all_in(self) -> List[Player]:
-        return [pot_player for pot_player in self.players if not pot_player.has_folded and not pot_player.is_all_in]
+        return [player for player in self.players if not player.has_folded and not player.is_all_in]

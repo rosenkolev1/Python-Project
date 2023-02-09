@@ -28,7 +28,7 @@ class ChooseActionFactory:
         return mock_choose_action
 
     @staticmethod
-    def mock_choose_action_always_raise_if_possible(self: Player, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
+    def choose_action_always_raise_if_possible(self: Player, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
         action_type: PlayerActionType = None
         
         if PlayerActionType.RAISE in possible_actions:        
