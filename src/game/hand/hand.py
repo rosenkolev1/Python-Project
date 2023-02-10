@@ -21,7 +21,7 @@ class Hand:
         self.set_hand_info()
 
     @staticmethod
-    def compare_kickers(first: List[Card], second: List[Card]) -> int:
+    def compare_kickers(first: List[Rank], second: List[Rank]) -> int:
         for i in range(len(first) - 1, -1, -1):
             first_rank: Rank = first[i]
             second_rank: Rank = second[i]
@@ -31,7 +31,6 @@ class Hand:
                 return diff
         
         return 0
-
 
     @staticmethod
     def compare_hands(first: 'Hand', second: 'Hand'):
