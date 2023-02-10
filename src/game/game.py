@@ -38,7 +38,6 @@ class Game:
 
         self.pots.clear()
 
-        #TODO: Change depending on the game setting
         if self.is_two_player_game and self.table is None:
             if self.settings.small_blind_enabled:
                 self.settings.small_blind_holder = 0
@@ -57,13 +56,21 @@ class Game:
         
         main_pot: Pot = Pot()
 
+        if self.settings.ante_enabled:
+            for player in self.players:
+                main_pot.place_bet(player, self.settings.ante_amount)
+                print(GameUI.ante_entered_info_prompt(player, self.settings.ante_amount))
+            print()
+
         if self.settings.small_blind_enabled:
             main_pot.place_bet(self.small_blind_player, self.settings.small_blind_bet)
             print(GameUI.small_blind_entered_info_prompt(self))
+            print()
 
         if self.settings.big_blind_enabled:
             main_pot.place_bet(self.big_blind_player, self.settings.big_blind_bet)
             print(GameUI.big_blind_entered_info_prompt(self))
+            print()
 
         # In this case, we put in bets of 0 from all players.
         # Otherwise, as soon as the first player plays something during the round, the round would end 
@@ -73,7 +80,6 @@ class Game:
 
             for player in self.players:
                 main_pot.place_bet(player, 0)
-
 
         self.pots.append(main_pot)
         self.current_pot_index = 0
@@ -86,20 +92,9 @@ class Game:
         self.play_round()
 
         print(GameUI.GAME_ENDING_INFO_PROMPT)
-
-    def _validate_money_for_big_blind_bet(self, money: float) -> None:
-        if self.settings.big_blind_enabled:
-            if money < self.settings.big_blind_bet:
-                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
-        elif self.settings.small_blind_enabled:
-            if money < self.settings.small_blind_bet:
-                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
-        elif self.settings.ante_enabled:
-            if money < self.settings.ante_amount:
-                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
         
     def add_player(self, player: Player) -> None:
-        self._validate_money_for_big_blind_bet(player.user.money)
+        self.settings._validate_money_for_game_settings(player.user.money)
 
         self.players.append(player)
         self.two_player_game = len(self.players) == 2

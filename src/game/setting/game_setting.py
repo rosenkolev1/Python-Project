@@ -33,14 +33,21 @@ class GameSetting:
         self.deck = deck
         return self
 
-    def enable_small_blind(self, amount: float) -> "GameSetting":
+    def enable_small_blind(self, amount: float, holder: int) -> "GameSetting":
         self.small_blind_bet = amount
+        self.small_blind_holder = holder
         self.small_blind_enabled = True
         return self
 
-    def enable_big_blind(self, amount: float) -> "GameSetting":
+    def enable_big_blind(self, amount: float, holder: int) -> "GameSetting":
         self.big_blind_bet = amount
+        self.big_blind_holder = holder
         self.big_blind_enabled = True
+        return self
+
+    def enable_ante(self, amount: float) -> "GameSetting":
+        self.ante_amount = amount
+        self.ante_enabled = True
         return self
 
     def set_dealer(self, holder: int) -> "GameSetting":
@@ -59,7 +66,13 @@ class GameSetting:
         self.hand_visibility_setting = setting
         return self
 
-    # def set_turn(self, turn: int) -> "GameSetting":
-    #     self.turn = turn
-    #     self.override_turn_enabled = True
-    #     return self
+    def _validate_money_for_game_settings(self, money: float) -> None:
+        if self.big_blind_enabled:
+            if money < self.big_blind_bet:
+                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
+        elif self.small_blind_enabled:
+            if money < self.small_blind_bet:
+                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
+        elif self.ante_enabled:
+            if money < self.ante_amount:
+                raise ValueError("The player that you are trying to add has less money than required to enter the game!")

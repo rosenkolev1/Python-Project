@@ -57,13 +57,6 @@ class Table:
     def next_dealer(self) -> None:
         self.game_settings.set_dealer(self.__next_index(self.game_settings.dealer_index))
 
-    def _validate_money_for_big_blind_bet(self, money: float) -> None:
-        if money < self.game_settings.big_blind_bet:
-            raise ValueError("The player that you are trying to add has less money than required to sit on the table!")
-
     def add_user(self, user: User) -> None:
-
-        #TODO: Change depending on settings
-        self._validate_money_for_big_blind_bet(user.money)
-
+        self.game_settings._validate_money_for_game_settings(user.money)
         self.users.append(user)

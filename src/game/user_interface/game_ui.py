@@ -62,7 +62,12 @@ class GameUI:
     @staticmethod
     def big_blind_entered_info_prompt(game: Game) -> str:
         return (f"Player: {game.big_blind_player.user.name} is entering the big blind amount of" + 
-               f" {game.settings.big_blind_bet}! Their current balance is {game.big_blind_player.user.money}\n") 
+               f" {game.settings.big_blind_bet}! Their current balance is {game.big_blind_player.user.money}") 
+
+    @staticmethod
+    def ante_entered_info_prompt(player: Player, ante_amount: float) -> str:
+        return (f"Player: {player.user.name} is entering the ante of" + 
+               f" {ante_amount}! Their current balance is {player.user.money}")
 
     @staticmethod
     def player_dealt_cards_info_prompt(player: Player) -> str:

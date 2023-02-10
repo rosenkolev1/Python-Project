@@ -5,7 +5,7 @@ from src.user.user import User
 
 class BotPlayer(Player):
     
-    def __init__(self, user: User, choose_action) -> None:
+    def __init__(self, user: User, choose_action = None) -> None:
         super().__init__(user)
         self.choose_action_preset = choose_action    
 
