@@ -8,10 +8,25 @@ from src.game.player.bot_player import BotPlayer
 from src.game.player.choose_action_factory import ChooseActionFactory
 from src.game.player.player_action import PlayerAction
 from src.game.player.player_action_type import PlayerActionType
+from src.game.setting.game_setting import GameSetting
+from src.game.setting.hand_visibility_setting import HandVisibilitySetting
 from src.user.user import User
 from src.game.deck.card import Card
 from src.game.deck.rank import Rank
 from src.game.deck.suit import Suit
+
+@pytest.mark.skip
+def default_game_settings(preset_deck: PresetDeck) -> GameSetting:
+    game_settings = GameSetting()
+    game_settings.enable_big_blind(50)
+    game_settings.enable_small_blind(25)
+    game_settings.set_dealer(0)
+    game_settings.set_small_blind_holder(1)
+    game_settings.set_big_blind_holder(2)
+    game_settings.set_hand_visibility(HandVisibilitySetting.ALL)
+    game_settings.set_deck(preset_deck)
+
+    return game_settings
 
 @pytest.mark.parametrize("user_first,user_second,user_first_expected_balance,user_second_expected_balance", 
     [
@@ -37,7 +52,14 @@ def test_2_players_always_raise_one_or_both_all_in(user_first: User, user_second
     player_second_best_hand = Hand(
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.DIAMONDS)])
 
-    game_first = Game(preset_deck, 25, 50)
+    # game_settings = GameSetting()
+    # game_settings.enable_big_blind(50)
+    # game_settings.enable_small_blind(25)
+    # game_settings.set_dealer(0)
+    # game_settings.set_hand_visibility(HandVisibilitySetting.ALL)
+    # game_settings.set_deck(preset_deck)
+
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
     game_first.add_player(player_second)
 
@@ -79,7 +101,7 @@ def test_3_players_always_raise(user_first: User, user_second: User, user_third:
     player_third_best_hand = Hand(
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.ACE, Suit.CLUBS), Card(Rank.ACE, Suit.DIAMONDS)])
 
-    game_first = Game(preset_deck, 25, 50)
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
     game_first.add_player(player_second)
     game_first.add_player(player_third)
@@ -149,7 +171,7 @@ def test_3_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: U
     player_third_best_hand = Hand(
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.ACE, Suit.CLUBS), Card(Rank.ACE, Suit.DIAMONDS)])
 
-    game_first = Game(preset_deck, 25, 50)
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
     game_first.add_player(player_second)
     game_first.add_player(player_third)
@@ -222,7 +244,7 @@ def test_3_players_single_side_pot_winner_is_from_side_pot_no_fold(user_first: U
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
         Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
 
-    game_first = Game(preset_deck, 25, 50)
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
     game_first.add_player(player_second)
     game_first.add_player(player_third)
@@ -275,7 +297,7 @@ def test_3_players_single_side_pot_winner_is_all_in_others_fold(user_first: User
     player_second = BotPlayer(user_second, player_second_actions)
     player_third = BotPlayer(user_third, player_third_actions)
 
-    game_first = Game(preset_deck, 25, 50)
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
     game_first.add_player(player_second)
     game_first.add_player(player_third)
@@ -348,7 +370,7 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_looses_no_fo
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
         Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.HEARTS)])
 
-    game_first = Game(preset_deck, 25, 50)
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
     game_first.add_player(player_second)
     game_first.add_player(player_third)
@@ -421,7 +443,7 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_wins_side(us
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
         Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.HEARTS)])
 
-    game_first = Game(preset_deck, 25, 50)
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
     game_first.add_player(player_second)
     game_first.add_player(player_third)

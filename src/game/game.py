@@ -45,6 +45,7 @@ class Game:
 
         self.pots.clear()
 
+        #TODO: Change depending on the game setting
         if self.is_two_player_game and self.table is None:
             self.settings.small_blind_holder = 0
             self.settings.big_blind_holder = 1
