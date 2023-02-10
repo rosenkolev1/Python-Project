@@ -7,6 +7,8 @@ from src.game.deck.suit import Suit
 from src.game.hand.hand import Hand
 from src.game.hand.hand_combination import HandCombination 
 from src.game.player.player_action_type import PlayerActionType
+from src.game.setting.game_setting import GameSetting
+from src.game.setting.hand_visibility_setting import HandVisibilitySetting
 from src.table.table import Table
 from src.user.user import User
 from src.game.player.player import Player
@@ -65,11 +67,18 @@ player_second_best_hand = Hand(
 
 # game_first.start_game()
 
-table_one = Table(25, 50)
+game_settings = GameSetting()
+game_settings.enable_big_blind(50)
+game_settings.enable_small_blind(25)
+game_settings.set_dealer(0)
+game_settings.set_hand_visibility(HandVisibilitySetting.ALL)
+game_settings.set_deck(preset_deck)
+
+table_one = Table(game_settings)
 table_one.add_user(user_first)
 table_one.add_user(user_second)
 
-table_one.new_game(preset_deck)
+table_one.new_game()
 table_one.current_game.add_player(player_first)
 table_one.current_game.add_player(player_second)
 
@@ -80,8 +89,9 @@ user_first.money = 200
 user_second.money = 100
 
 table_one.rotate_button()
+table_one.game_settings.set_deck(Deck())
 
-table_one.new_game(Deck())
+table_one.new_game()
 
 player_first.predefine_choose_action(ChooseActionFactory.create_choose_action_predetermined_human_player(player_second_actions))
 player_second.predefine_choose_action(ChooseActionFactory.create_choose_action_predetermined(player_first_actions))

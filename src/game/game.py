@@ -11,28 +11,32 @@ from src.game.player.player import Player
 from src.game.deck.deck import Deck
 from src.game.game_round import GameRound
 from src.game.pot import Pot
+from src.game.setting.game_setting import GameSetting
 from src.game.user_interface.game_ui import GameUI
 
 class Game:
 
-    def __init__(self, deck: Deck, small_blind_bet: float, big_blind_bet: float) -> None:
-        self.deck: Deck = deck
-        self.__players: List[Player] = []
-        self.round: GameRound = GameRound.Pre_Flop
+    def __init__(self, game_setting: GameSetting) -> None:
+        # self.deck: Deck = game_setting.deck
 
+        # self.turn: int = game_setting.turn
+        # self.dealer_index: int = game_setting.dealer_index
+
+        # self.small_blind_bet: float = game_setting.small_blind_bet
+        # self.small_blind_holder: int = game_setting.small_blind_holder
+
+        # self.big_blind_bet: float = game_setting.big_blind_bet
+        # self.big_blind_holder: int = game_setting.big_blind_holder
+
+        self.settings: GameSetting = game_setting
+        
         self.community_cards: List[Card] = []
-
-        self.turn: int = 0
-        self.dealer_index: int = 0
-
+        
         self.pots: List[Pot] = []
         self.current_pot_index: int = 0 
 
-        self.small_blind_bet: float = small_blind_bet
-        self.small_blind_holder: int = 1
-
-        self.big_blind_bet: float = big_blind_bet
-        self.big_blind_holder: int = 2
+        self.players: List[Player] = []
+        self.round: GameRound = GameRound.Pre_Flop
 
         self.table = None
 
@@ -42,8 +46,8 @@ class Game:
         self.pots.clear()
 
         if self.is_two_player_game and self.table is None:
-            self.small_blind_holder = 0
-            self.big_blind_holder = 1
+            self.settings.small_blind_holder = 0
+            self.settings.big_blind_holder = 1
 
         print(GameUI.dealer_info_prompt(self))
         print(GameUI.small_blind_player_info_prompt(self))
@@ -52,8 +56,8 @@ class Game:
         
         main_pot: Pot = Pot()
 
-        main_pot.place_bet(self.small_blind_player, self.small_blind_bet)
-        main_pot.place_bet(self.big_blind_player, self.big_blind_bet)
+        main_pot.place_bet(self.small_blind_player, self.settings.small_blind_bet)
+        main_pot.place_bet(self.big_blind_player, self.settings.big_blind_bet)
         
         print(GameUI.small_blind_entered_info_prompt(self))
         print(GameUI.big_blind_entered_info_prompt(self))
@@ -64,14 +68,14 @@ class Game:
         print(GameUI.GAME_STARTING_INFO_PROMPT)
             
         #Shuffle deck
-        self.deck.shuffle_deck()
+        self.settings.deck.shuffle_deck()
 
         self.play_round()
 
         print(GameUI.GAME_ENDING_INFO_PROMPT)
 
     def _validate_money_for_big_blind_bet(self, money: float) -> None:
-        if money < self.big_blind_bet:
+        if money < self.settings.big_blind_bet:
             raise ValueError("The player that you are trying to add has less money than required to enter the game!")
         
     def add_player(self, player: Player) -> None:
@@ -96,7 +100,7 @@ class Game:
 
     def next_turn(self) -> None:
         while True:
-            self.turn = self.__next_index(self.turn)
+            self.settings.turn = self.__next_index(self.settings.turn)
             
             if not self.current_player.has_played_turn:
                 break
@@ -105,7 +109,7 @@ class Game:
         #Give out a card to each player once and then twice(because that is how you deal poker hands, one at a time)
         for i in range(2):         
             for player in self.players:
-                player.cards.append(self.deck.cards.pop())
+                player.cards.append(self.settings.deck.cards.pop())
             
         for player in self.players: 
             print(GameUI.player_dealt_cards_info_prompt(player))
@@ -113,17 +117,17 @@ class Game:
         print()
 
     def _deal_flop(self):
-        self.deck.cards.pop()
+        self.settings.deck.cards.pop()
         
         for i in range(0, 3):
-            self.community_cards.append(self.deck.cards.pop())
+            self.community_cards.append(self.settings.deck.cards.pop())
 
         print(GameUI.flop_dealing_cards_from_deck_info_prompt(self))
         
     def _deal_turn_or_river(self):
-        self.deck.cards.pop()
+        self.settings.deck.cards.pop()
         
-        self.community_cards.append(self.deck.cards.pop())
+        self.community_cards.append(self.settings.deck.cards.pop())
 
         print(GameUI.dealing_cards_from_deck_turn_river_info_prompt(self))
 
@@ -156,9 +160,9 @@ class Game:
         #Set the first person to act during the round. If we are in pre-flop, then that is the person after the big_blind_holder.
         #Else, it is the person after the dealer(the small_blind_holder, who is inbetween the dealer and the big_blind_holder)
         if self.round == GameRound.Pre_Flop:
-            self.turn = self.big_blind_holder
+            self.settings.turn = self.settings.big_blind_holder
         else:
-            self.turn = self.dealer_index    
+            self.settings.turn = self.settings.dealer_index    
 
         self.deal_cards()
 
@@ -433,20 +437,16 @@ class Game:
 
     @property
     def current_player(self) -> Player:
-        return self.players[self.turn]
+        return self.players[self.settings.turn]
 
     @property
     def big_blind_player(self) -> Player:
-        return self.players[self.big_blind_holder]
+        return self.players[self.settings.big_blind_holder]
 
     @property
     def small_blind_player(self) -> Player:
-        return self.players[self.small_blind_holder]
+        return self.players[self.settings.small_blind_holder]
     
     @property
     def dealer_player(self) -> Player:
-        return self.players[self.dealer_index]
-        
-    @property
-    def players(self) -> List[Player]:
-        return self.__players    
+        return self.players[self.settings.dealer_index]

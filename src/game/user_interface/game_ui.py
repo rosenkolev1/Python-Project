@@ -45,21 +45,24 @@ class GameUI:
     def players_list_info_prompt(game: Game) -> str:
         players: List[Player] = []
 
-        for i in range(game.dealer_index, len(game.players)):
+        for i in range(game.settings.dealer_index, len(game.players)):
             players.append(game.players[i])
 
-        for i in range(0, game.dealer_index):
+        for i in range(0, game.settings.dealer_index):
             players.append(game.players[i])
 
         return f"The players, starting from the dealer, are: {' --> '.join(map(lambda p: p.user.name, players))}\n"
     
     @staticmethod
     def small_blind_entered_info_prompt(game: Game) -> str:
-        return f"Player: {game.small_blind_player.user.name} is entering the small blind amount of {game.small_blind_bet}! Their current balance is {game.small_blind_player.user.money}"
+        return (
+            f"Player: {game.small_blind_player.user.name} is entering the small blind amount of" + 
+            f" {game.settings.small_blind_bet}! Their current balance is {game.small_blind_player.user.money}")
 
     @staticmethod
     def big_blind_entered_info_prompt(game: Game) -> str:
-        return f"Player: {game.big_blind_player.user.name} is entering the big blind amount of {game.big_blind_bet}! Their current balance is {game.big_blind_player.user.money}\n" 
+        return (f"Player: {game.big_blind_player.user.name} is entering the big blind amount of" + 
+               f" {game.settings.big_blind_bet}! Their current balance is {game.big_blind_player.user.money}\n") 
 
     @staticmethod
     def player_dealt_cards_info_prompt(player: Player) -> str:
