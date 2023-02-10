@@ -18,6 +18,15 @@ class PresetDeck(Deck):
         for i in range(len(cards)):
             self.preset[player_turn + i * self.players_count] = cards[i]  
     
+    def preset_community(self, cards: List[Card]):
+        flop_cards: List[Card] = [cards[i] for i in range(0, len(cards)) if i < 3]
+        turn_card: Card = cards[3]
+        river_card: Card = cards[4]
+
+        self.preset_flop(flop_cards)
+        self.preset_turn(turn_card)
+        self.preset_river(river_card)
+
     def preset_flop(self, cards: List[Card]):
         for i in range(len(cards)):
             self.preset[self.flop_start_index + i] = cards[i]

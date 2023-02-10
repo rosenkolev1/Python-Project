@@ -348,7 +348,14 @@ class Game:
             for player in players:
                 if player.is_all_in:
                     player_stake = player.stake
-                    pot.total_money = len(players) * player_stake
+
+                    original_pot_total_money: float = pot.total_money
+
+                    #Calculate the leftover money for the main(er) pot
+                    for main_player in players:
+                        pot.total_money -= main_player.stake
+
+                    pot.total_money += len(players) * player_stake
                     
                     side_pot: Pot = Pot()                     
                     side_players = filter(lambda x: x != player, players)
@@ -357,7 +364,8 @@ class Game:
                     for side_player in side_players:
                         side_pot.players.append(side_player)
                         side_player.stake -= player_stake
-                        side_pot.total_money += side_player.stake
+
+                    side_pot.total_money = original_pot_total_money - pot.total_money
                         
                     self.pots.append(side_pot)
                     self.current_pot_index += 1

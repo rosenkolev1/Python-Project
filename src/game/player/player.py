@@ -42,9 +42,6 @@ class Player(ABC):
             possible_actions.append(PlayerActionType.FOLD)
             stake = pot.get_stake_for_player(self)
 
-            #The player can always choose to go all-in
-            possible_actions.append(PlayerActionType.ALL_IN)
-
             #In this case, there has been a bet this round already (big blind and small blind during pre-flop counts as a bet)
             if 0 != pot.current_highest_stake:
                 highest_stake_diff: float = pot.current_highest_stake - stake
@@ -57,7 +54,8 @@ class Player(ABC):
                 if call_amount < 0:
                     call_amount = 0
 
-                can_raise: bool = not calling_is_all_in and any(map(lambda x: x != self and not x.is_all_in, pot.players))
+                can_raise: bool = not calling_is_all_in and any(
+                    map(lambda x: x != self and not x.is_all_in, pot.get_players_not_folded()))
 
                 if call_amount > 0 and not calling_is_all_in:
                     possible_actions.append(PlayerActionType.CALL)
@@ -65,10 +63,14 @@ class Player(ABC):
                 if call_amount == 0:
                     possible_actions.append(PlayerActionType.CHECK)
 
+                if calling_is_all_in or can_raise:
+                    possible_actions.append(PlayerActionType.ALL_IN)
+
                 if can_raise:
                     possible_actions.append(PlayerActionType.RAISE)
             #In this case, nobody has bet thus far this round
             else:
+                possible_actions.append(PlayerActionType.ALL_IN)
                 possible_actions.append(PlayerActionType.CHECK)
                 
                 #This is only possible for the big_blind_holder during the pre-flop, 
