@@ -34,6 +34,8 @@ class Game:
         self.table = None
 
     def start_game(self):
+        print(GameUI.GAME_STARTING_INFO_PROMPT)
+
         self.round = GameRound.Pre_Flop
 
         self.pots.clear()
@@ -87,8 +89,6 @@ class Game:
 
         self.pots.append(main_pot)
         self.current_pot_index = 0
-
-        print(GameUI.GAME_STARTING_INFO_PROMPT)
             
         #Shuffle deck
         self.settings.deck.shuffle_deck()

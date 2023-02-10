@@ -85,12 +85,15 @@ class ChooseActionFactory:
             else:
                 action_type = possible_actions_filtered[random.randint(0, len(possible_actions_filtered) - 1)] 
 
-            amount: float = min(call_amount + random.randint(1, 50), self.user.money - 1)
+            amount: float = min(call_amount + random.randint(1, 50), self.user.money)
 
             if action_type == PlayerActionType.CALL:
                 amount = call_amount
             elif action_type == PlayerActionType.ALL_IN:
                 amount = self.user.money
+            #Force and all-in if the action is a raise and the amount is equal to all the remaining money of the user
+            elif action_type == PlayerActionType.RAISE and amount == self.user.money:
+                return PlayerAction(PlayerActionType.ALL_IN, amount)
 
             return PlayerAction(action_type, amount)
 

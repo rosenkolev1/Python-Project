@@ -1,3 +1,4 @@
+import sys
 from src.game.deck.card import Card
 from src.game.deck.deck import Deck
 from src.game.deck.preset_deck import PresetDeck
@@ -60,12 +61,12 @@ bot_player_6.predefine_choose_action(ChooseActionFactory.create_choose_action_al
 ))
 
 game_settings = (GameSetting()
-            .enable_big_blind(50, 2)
-            .enable_small_blind(25, 1)
+            .enable_big_blind(50, 1)
+            .enable_small_blind(25, 0)
             # .enable_ante(10)
-            .set_dealer(0)
+            .set_dealer(-1)
             .set_hand_visibility(HandVisibilitySetting.ALL)
-            .set_deck(Deck())
+            # .set_deck(Deck())
             )
 
 # game_1 = Game(game_settings)
@@ -87,30 +88,47 @@ table_1.add_user(user_4)
 table_1.add_user(user_5)
 table_1.add_user(user_6)
 
-#Create a table and play games until there is a single winner left
-print("The tournament begins!\n\n")
+#Redirect output to a file for fun
+with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
 
-while True:
-    table_1.new_game()
+    #Create a table and play games until there is a single winner left
+    print("The tournament begins!\n\n")
 
-    for user in table_1.users:
-        try:
-            table_1.current_game.add_player
-            (
-                BotPlayer(user, ChooseActionFactory.create_choose_action_always_random(
-                        [PlayerActionType.FOLD, PlayerActionType.ALL_IN], PlayerActionType.ALL_IN
-                    ))
-            )
-        except InvalidMoneyForSettingsException as e:
-            table_1.users.remove(user)
+    while True:
+        game_settings.set_deck(Deck())
+        table_1.new_game()
 
-    if len(table_1.users) == 1:
-        print(f"The winner of the tournament is {table_1.users[0].name}")
+        new_table_users = []
 
-    table_1.start_game()
+        for i in range(0, len(table_1.users)):
+            user = table_1.users[i]
 
-    if table_1.game_history % 5 == 0:
-        game_settings.big_blind_bet += 5
-        game_settings.small_blind_bet = game_settings.big_blind_bet / 2
+            try:
+                bot_player = BotPlayer(user, ChooseActionFactory.create_choose_action_always_random(
+                            [PlayerActionType.ALL_IN], PlayerActionType.ALL_IN
+                        ))
 
-    table_1.rotate_button()
+                table_1.current_game.add_player(bot_player)
+                
+                new_table_users.append(user)
+            except InvalidMoneyForSettingsException as e:
+                print(f"Player: {user.name} has been eliminated from the tournament!!!\n")
+
+        table_1.users = new_table_users
+
+        if len(table_1.users) == 1:
+            print(f"The winner of the tournament is {table_1.users[0].name}")
+            break
+
+        table_1.rotate_button()
+
+        print(f"{'*' * 100} Game #{len(table_1.game_history) + 1} {'*' * 100}")
+        table_1.start_game()
+        print(f"{'*' * 100} End of Game #{len(table_1.game_history)} {'*' * 100}")
+
+        if len(table_1.game_history) % 5 == 0:
+            game_settings.big_blind_bet += 5
+            game_settings.small_blind_bet = game_settings.big_blind_bet / 2
+
+            print(f"\nBig blind increased to: {game_settings.big_blind_bet}")
+            print(f"Small blind increased to: {game_settings.small_blind_bet}\n")
