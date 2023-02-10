@@ -18,19 +18,19 @@ from src.game.player.human_player import HumanPlayer
 from src.game.player.player_action import PlayerAction
 from src.game.player.choose_action_factory import ChooseActionFactory
 
-# user_1 = User("Roskata", 100)
-# user_2 = User("Stefan", 150)
-# user_3 = User("Kris", 200)
-# user_4 = User("Miro", 250)
-# user_5 = User("Ge6a", 1000)
-# user_6 = User("Pe6o", 1000)
+user_1 = User("Roskata", 100)
+user_2 = User("Stefan", 150)
+user_3 = User("Kris", 200)
+user_4 = User("Miro", 250)
+user_5 = User("Ge6a", 1000)
+user_6 = User("Pe6o", 1000)
 
-# player_1 = HumanPlayer(user_1)
-# player_2 = HumanPlayer(user_2)
-# player_3 = HumanPlayer(user_3)
-# player_4 = HumanPlayer(user_4)
-# player_5 = HumanPlayer(user_5)
-# player_6 = HumanPlayer(user_6)
+player_1 = HumanPlayer(user_1)
+player_2 = HumanPlayer(user_2)
+player_3 = HumanPlayer(user_3)
+player_4 = HumanPlayer(user_4)
+player_5 = HumanPlayer(user_5)
+player_6 = HumanPlayer(user_6)
 
 # player_1_preset_actions = ChooseActionFactory.create_choose_action_predetermined_human_player(
 #     [
@@ -124,32 +124,23 @@ from src.game.player.choose_action_factory import ChooseActionFactory
 #     ]
 # )
 
-# game_settings = (GameSetting()
-#             .enable_big_blind(50)
-#             .enable_small_blind(25)
-#             .set_dealer(0)
-#             .set_small_blind_holder(1)
-#             .set_big_blind_holder(2)
-#             .set_hand_visibility(HandVisibilitySetting.ALL)
-#             .set_deck(Deck())
-#             )
+game_settings = (GameSetting()
+            # .enable_big_blind(50)
+            # .enable_small_blind(25)
+            .set_dealer(0)
+            # .set_small_blind_holder(1)
+            # .set_big_blind_holder(2)
+            .set_hand_visibility(HandVisibilitySetting.ALL)
+            .set_deck(Deck())
+            )
 # game_settings.set_deck(preset_deck)
 
-# game_first = Game(game_settings)
-# game_first.add_player(player_1)
-# game_first.add_player(player_2)
-# game_first.add_player(player_3)
-# game_first.add_player(player_4)
-# game_first.add_player(player_5)
-# game_first.add_player(player_6)
+game_first = Game(game_settings)
+game_first.add_player(player_1)
+game_first.add_player(player_2)
+game_first.add_player(player_3)
+game_first.add_player(player_4)
+game_first.add_player(player_5)
+game_first.add_player(player_6)
 
-# game_first.start_game()
-
-# assert len(game_first.pots) == 4
-
-# assert player_1.user.money == 0
-# assert player_2.user.money == 700
-# assert player_3.user.money == 0
-# assert player_4.user.money == 150
-# assert player_5.user.money == 950
-# assert player_6.user.money == 900
+game_first.start_game()

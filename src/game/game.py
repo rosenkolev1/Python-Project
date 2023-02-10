@@ -65,6 +65,16 @@ class Game:
             main_pot.place_bet(self.big_blind_player, self.settings.big_blind_bet)
             print(GameUI.big_blind_entered_info_prompt(self))
 
+        # In this case, we put in bets of 0 from all players.
+        # Otherwise, as soon as the first player plays something during the round, the round would end 
+        if (not self.settings.big_blind_enabled 
+            and not self.settings.small_blind_enabled
+            and not self.settings.ante_enabled):
+
+            for player in self.players:
+                main_pot.place_bet(player, 0)
+
+
         self.pots.append(main_pot)
         self.current_pot_index = 0
 
@@ -166,87 +176,7 @@ class Game:
     def deal_until_showdown(self):
         while len(self.community_cards) != 5:
             self.deal_cards()
-            self.next_round()        
-
-    def start_round(self): 
-        print(GameUI.round_starting_info_prompt(self))
-
-        #Set the current highest stake for the current pot for this round to 0 to reset it
-        if (self.round != GameRound.Pre_Flop):
-            self.current_pot.current_highest_stake = 0
-
-        #Reset the has_played_turn status for all the players who have not folded and are not all-in
-        for player in self.current_pot.get_players_not_folded_and_not_all_in():
-            player.has_played_turn = False
-
-        #Set the first person to act during the round. If we are in pre-flop, then that is the person after the big_blind_holder.
-        #Else, it is the person after the dealer(the small_blind_holder, who is inbetween the dealer and the big_blind_holder)
-        #There is a big_blind_holder in the game, 
-        #Otherwise, we start from the person to the right of the small_blind_holder during pre-flop
-        #If there is also no small_blind_holder, then we start to the right of the dealer(button) for all rounds
-        if self.round == GameRound.Pre_Flop:
-            if self.settings.big_blind_enabled:
-                self.turn = self.settings.big_blind_holder
-            elif self.settings.small_blind_enabled:
-                self.turn = self.settings.small_blind_holder
-            else:
-                self.turn = self.settings.dealer_index
-        else:
-            self.turn = self.settings.dealer_index    
-
-        self.deal_cards()
-
-        self.next_turn()
-
-    def play_turn(self) -> bool:
-        player = self.current_player
-        pot = self.current_pot
-        
-        #Determine the possible actions
-        possible_actions, call_amount = player.get_possible_actions(pot)
-
-        action: PlayerAction = player.choose_action(possible_actions, call_amount)
-
-        is_all_in: bool = action.type == PlayerActionType.ALL_IN
-        is_all_in_and_raise: bool = is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake
-
-        if action.type == PlayerActionType.FOLD:
-            player.has_folded = True
-        elif action.type == PlayerActionType.RAISE or action.type == PlayerActionType.BET or is_all_in_and_raise:
-            #For each player that has not folded or is not all-in, reset their has_played_turn state
-            for other_player in self.players:
-                if not other_player.has_folded and not other_player.is_all_in:
-                    other_player.has_played_turn = False
-
-        if action.type != PlayerActionType.FOLD and action.type != PlayerActionType.CHECK:
-            pot.place_bet(player, action.amount)
-            
-            #In this case, we are not all-in
-            if not is_all_in:
-                if action.type == PlayerActionType.RAISE:
-                    print(GameUI.player_raising_info_prompt(player, action, call_amount))
-                else:
-                    print(GameUI.player_bet_or_call_info_prompt(player, action))
-            else:
-                print(GameUI.player_all_in_info_prompt(player, action))
-                
-        elif action.type == PlayerActionType.FOLD:
-            print(GameUI.player_fold_info_prompt(player))
-        elif action.type == PlayerActionType.CHECK:
-            print(GameUI.player_check_info_prompt(player)) 
-
-        player.has_played_turn = True
-        
-        players_not_played: List[Player] = pot.get_players_not_played()
-        players_not_folded: List[Player] = pot.get_players_not_folded()
-
-        if len(players_not_played) == 0:
-            return True
-        elif len(players_not_folded) == 1:
-            return True
-
-        self.next_turn()
-        return False       
+            self.next_round()            
 
     def play_showdown(self):
         print(GameUI.SHOWDOWN_STARTING_INFO_PROMPT)
@@ -372,6 +302,36 @@ class Game:
                     
                     break
 
+    def start_round(self): 
+        print(GameUI.round_starting_info_prompt(self))
+
+        #Set the current highest stake for the current pot for this round to 0 to reset it
+        if (self.round != GameRound.Pre_Flop):
+            self.current_pot.current_highest_stake = 0
+
+        #Reset the has_played_turn status for all the players who have not folded and are not all-in
+        for player in self.current_pot.get_players_not_folded_and_not_all_in():
+            player.has_played_turn = False
+
+        #Set the first person to act during the round. If we are in pre-flop, then that is the person after the big_blind_holder.
+        #Else, it is the person after the dealer(the small_blind_holder, who is inbetween the dealer and the big_blind_holder)
+        #There is a big_blind_holder in the game, 
+        #Otherwise, we start from the person to the right of the small_blind_holder during pre-flop
+        #If there is also no small_blind_holder, then we start to the right of the dealer(button) for all rounds
+        if self.round == GameRound.Pre_Flop:
+            if self.settings.big_blind_enabled:
+                self.turn = self.settings.big_blind_holder
+            elif self.settings.small_blind_enabled:
+                self.turn = self.settings.small_blind_holder
+            else:
+                self.turn = self.settings.dealer_index
+        else:
+            self.turn = self.settings.dealer_index    
+
+        self.deal_cards()
+
+        self.next_turn()
+
     def play_round(self) -> None:
         self.start_round()
 
@@ -408,6 +368,56 @@ class Game:
             elif round_over:
                 self.play_round()
                 break
+
+    def play_turn(self) -> bool:
+        player = self.current_player
+        pot = self.current_pot
+        
+        #Determine the possible actions
+        possible_actions, call_amount = player.get_possible_actions(pot)
+
+        action: PlayerAction = player.choose_action(possible_actions, call_amount)
+
+        is_all_in: bool = action.type == PlayerActionType.ALL_IN
+        is_all_in_and_raise: bool = is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake
+
+        if action.type == PlayerActionType.FOLD:
+            player.has_folded = True
+        elif action.type == PlayerActionType.RAISE or action.type == PlayerActionType.BET or is_all_in_and_raise:
+            #For each player that has not folded or is not all-in, reset their has_played_turn state
+            for other_player in self.players:
+                if not other_player.has_folded and not other_player.is_all_in:
+                    other_player.has_played_turn = False
+
+        if action.type != PlayerActionType.FOLD and action.type != PlayerActionType.CHECK:
+            pot.place_bet(player, action.amount)
+            
+            #In this case, we are not all-in
+            if not is_all_in:
+                if action.type == PlayerActionType.RAISE:
+                    print(GameUI.player_raising_info_prompt(player, action, call_amount))
+                else:
+                    print(GameUI.player_bet_or_call_info_prompt(player, action))
+            else:
+                print(GameUI.player_all_in_info_prompt(player, action))
+                
+        elif action.type == PlayerActionType.FOLD:
+            print(GameUI.player_fold_info_prompt(player))
+        elif action.type == PlayerActionType.CHECK:
+            print(GameUI.player_check_info_prompt(player)) 
+
+        player.has_played_turn = True
+        
+        players_not_played: List[Player] = pot.get_players_not_played()
+        players_not_folded: List[Player] = pot.get_players_not_folded()
+
+        if len(players_not_played) == 0:
+            return True
+        elif len(players_not_folded) == 1:
+            return True
+
+        self.next_turn()
+        return False
 
     def next_round(self):
         print(GameUI.round_over_line_separator(self))

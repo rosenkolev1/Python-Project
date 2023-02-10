@@ -6,6 +6,7 @@ from src.game.game import Game
 from src.game.hand.hand import Hand
 from src.game.player.bot_player import BotPlayer
 from src.game.player.choose_action_factory import ChooseActionFactory
+from src.game.player.human_player import HumanPlayer
 from src.game.player.player_action import PlayerAction
 from src.game.player.player_action_type import PlayerActionType
 from src.game.setting.game_setting import GameSetting
@@ -71,7 +72,7 @@ def test_3_players_always_raise(user_first: User, user_second: User, user_third:
     [
         (User("roskata", 100), User("stefan", 200), User("kris", 200), 0, 20, 480),
     ])
-def test_3_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: User, user_second: User, user_third: User,
+def test_3_human_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: User, user_second: User, user_third: User,
                                    user_first_expected_balance: float, user_second_expected_balance: float, user_third_expected_balance: float):
     preset_deck = PresetDeck(3, 2)
 
@@ -83,13 +84,13 @@ def test_3_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: U
     preset_deck.preset_turn(Card(Rank.SEVEN, Suit.CLUBS))
     preset_deck.preset_river(Card(Rank.ACE, Suit.HEARTS))
 
-    player_first_actions = ChooseActionFactory.create_choose_action_predetermined(
+    player_first_actions = ChooseActionFactory.create_choose_action_predetermined_human_player(
             [
                 PlayerAction(PlayerActionType.ALL_IN, 100) #Pre-flop
             ]
         )
     
-    player_second_actions = ChooseActionFactory.create_choose_action_predetermined(
+    player_second_actions = ChooseActionFactory.create_choose_action_predetermined_human_player(
             [
                 PlayerAction(PlayerActionType.CALL, 75), #Pre-flop
                 PlayerAction(PlayerActionType.CHECK, 0), #Flop
@@ -100,7 +101,7 @@ def test_3_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: U
             ], 
         )
     
-    player_third_actions = ChooseActionFactory.create_choose_action_predetermined(
+    player_third_actions = ChooseActionFactory.create_choose_action_predetermined_human_player(
             [
                 PlayerAction(PlayerActionType.CALL, 50), #Pre-flop
                 PlayerAction(PlayerActionType.BET, 50), #Flop
@@ -109,9 +110,16 @@ def test_3_players_single_side_pot_winner_is_from_main_pot_no_fold(user_first: U
             ], 
         )
 
-    player_first = BotPlayer(user_first, player_first_actions)
-    player_second = BotPlayer(user_second, player_second_actions)
-    player_third = BotPlayer(user_third, player_third_actions)
+    # player_first = BotPlayer(user_first, player_first_actions)
+    # player_second = BotPlayer(user_second, player_second_actions)
+    # player_third = BotPlayer(user_third, player_third_actions)
+    player_first = HumanPlayer(user_first)
+    player_second = HumanPlayer(user_second)
+    player_third = HumanPlayer(user_third)
+
+    player_first.predefine_choose_action(player_first_actions)
+    player_second.predefine_choose_action(player_second_actions)
+    player_third.predefine_choose_action(player_third_actions)
 
     player_first_best_hand = Hand(
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
