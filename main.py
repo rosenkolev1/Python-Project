@@ -45,11 +45,11 @@ player_second = HumanPlayer(user_second)
 # ))
 
 game_settings = GameSetting()
-# game_settings.enable_big_blind(50)
+game_settings.enable_big_blind(50)
 game_settings.enable_small_blind(25)
 game_settings.set_dealer(0)
 game_settings.set_small_blind_holder(1)
-# game_settings.set_big_blind_holder(2)
+game_settings.set_big_blind_holder(2)
 game_settings.set_hand_visibility(HandVisibilitySetting.ALL)
 game_settings.set_deck(Deck())
 

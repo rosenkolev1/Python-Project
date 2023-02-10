@@ -196,62 +196,14 @@ class Game:
 
         self.deal_cards()
 
-        self.next_turn()  
-
-    def get_possible_actions(self, player: Player, pot: Pot) -> Tuple[List[PlayerActionType], float]:
-        #Determine the possible actions
-        call_amount: float = 0
-        possible_actions: List[PlayerActionType] = []
-
-        if not player.has_folded and not player.is_all_in:
-
-            possible_actions.append(PlayerActionType.FOLD)
-            stake = pot.get_stake_for_player(player)
-
-            #The player can always choose to go all-in
-            possible_actions.append(PlayerActionType.ALL_IN)
-
-            #In this case, there has been a bet this round already (big blind and small blind during pre-flop counts as a bet)
-            if 0 != pot.current_highest_stake:
-                highest_stake_diff: float = pot.current_highest_stake - stake
-
-                calling_is_all_in = highest_stake_diff >= player.user.money
-
-                call_amount: float = min(highest_stake_diff, player.user.money)   
-
-                #This happens at the start of the new rounds, i.e. when there is not bet to call on
-                if call_amount < 0:
-                    call_amount = 0
-
-                can_raise: bool = not calling_is_all_in and any(map(lambda x: x != player and not x.is_all_in, pot.players))
-
-                if call_amount > 0 and not calling_is_all_in:
-                    possible_actions.append(PlayerActionType.CALL)
-
-                if call_amount == 0:
-                    possible_actions.append(PlayerActionType.CHECK)
-
-                if can_raise:
-                    possible_actions.append(PlayerActionType.RAISE)
-            #In this case, nobody has bet thus far this round
-            else:
-                possible_actions.append(PlayerActionType.CHECK)
-                
-                #This is only possible for the big_blind_holder during the pre-flop, 
-                #Where they can either choose to Check or to raise the big_blind
-                if stake == pot.current_highest_stake:                    
-                    possible_actions.append(PlayerActionType.RAISE)
-                else:
-                    possible_actions.append(PlayerActionType.BET)
-
-        return (possible_actions, call_amount)
+        self.next_turn()
 
     def play_turn(self) -> bool:
         player = self.current_player
         pot = self.current_pot
         
         #Determine the possible actions
-        possible_actions, call_amount = self.get_possible_actions(player, pot)
+        possible_actions, call_amount = player.get_possible_actions(pot)
 
         action: PlayerAction = player.choose_action(possible_actions, call_amount)
 
