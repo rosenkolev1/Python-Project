@@ -38,7 +38,13 @@ def test_3_players_always_raise(user_first: User, user_second: User, user_third:
     player_third = BotPlayer(user_third, ChooseActionFactory.create_choose_action_always_raise_if_possible())
 
     player_first_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.EIGHT, Suit.DIAMONDS)
+        ])
 
     player_second_best_hand = Hand(
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.DIAMONDS)])
@@ -178,16 +184,31 @@ def test_3_players_single_side_pot_winner_is_from_side_pot_no_fold(user_first: U
     player_third = BotPlayer(user_third, player_third_actions)
 
     player_first_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.ACE, Suit.HEARTS), Card(Rank.ACE, Suit.CLUBS), Card(Rank.ACE, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.ACE, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.DIAMONDS)
+        ])
 
     player_second_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.SEVEN, Suit.DIAMONDS)
+        ])
     
     player_third_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.EIGHT, Suit.DIAMONDS)
+        ])
 
     game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
@@ -304,16 +325,31 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_looses_no_fo
     player_third = BotPlayer(user_third, player_third_actions)
 
     player_first_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.EIGHT, Suit.DIAMONDS)
+        ])
 
     player_second_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.SEVEN, Suit.DIAMONDS)
+        ])
     
     player_third_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.HEARTS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.SEVEN, Suit.HEARTS)
+        ])
 
     game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
@@ -377,16 +413,31 @@ def test_3_players_single_side_pot_2_way_tie_for_main_all_in_player_wins_side(us
     player_third = BotPlayer(user_third, player_third_actions)
 
     player_first_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.ACE, Suit.HEARTS), Card(Rank.ACE, Suit.CLUBS), Card(Rank.ACE, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.ACE, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.DIAMONDS)
+        ])
 
     player_second_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.SEVEN, Suit.DIAMONDS)
+        ])
     
     player_third_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), 
-        Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.HEARTS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.SEVEN, Suit.HEARTS)
+        ])
 
     game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)

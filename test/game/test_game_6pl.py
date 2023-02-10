@@ -1,3 +1,4 @@
+import pytest
 from src.game.deck.card import Card
 from src.game.deck.deck import Deck
 from src.game.deck.preset_deck import PresetDeck
@@ -17,6 +18,7 @@ from src.game.player.bot_player import BotPlayer
 from src.game.player.human_player import HumanPlayer
 from src.game.player.player_action import PlayerAction
 from src.game.player.choose_action_factory import ChooseActionFactory
+from test.game.helper.settings_functions import default_game_settings
 
 def test_6_human_players_4_pots_different_winners_with_folding_players():
     user_1 = User("Roskata", 100)
@@ -125,18 +127,46 @@ def test_6_human_players_4_pots_different_winners_with_folding_players():
         ]
     )
 
-    game_settings = (GameSetting()
-                .enable_big_blind(50)
-                .enable_small_blind(25)
-                .set_dealer(0)
-                .set_small_blind_holder(1)
-                .set_big_blind_holder(2)
-                .set_hand_visibility(HandVisibilitySetting.ALL)
-                .set_deck(Deck())
-                )
-    game_settings.set_deck(preset_deck)
+    player_1_best_hand = Hand(
+        [
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.ACE, Suit.SPADES), 
+            Card(Rank.JACK, Suit.CLUBS), 
+            Card(Rank.NINE, Suit.DIAMONDS), 
+            Card(Rank.JACK, Suit.HEARTS)
+        ])
 
-    game_first = Game(game_settings)
+    player_2_best_hand = Hand(
+        [
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.ACE, Suit.SPADES), 
+            Card(Rank.JACK, Suit.CLUBS), 
+            Card(Rank.NINE, Suit.DIAMONDS), 
+            Card(Rank.ACE, Suit.CLUBS)
+        ])
+
+    player_3_best_hand = Hand(
+        [
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.ACE, Suit.SPADES), 
+            Card(Rank.JACK, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.DIAMONDS)
+        ])
+
+    player_4_best_hand = Hand(
+        [
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.ACE, Suit.SPADES), 
+            Card(Rank.JACK, Suit.CLUBS), 
+            Card(Rank.EIGHT, Suit.CLUBS), 
+            Card(Rank.EIGHT, Suit.DIAMONDS)
+        ])
+
+    player_5_best_hand = None
+    player_6_best_hand = None
+
+    game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_1)
     game_first.add_player(player_2)
     game_first.add_player(player_3)
@@ -148,9 +178,19 @@ def test_6_human_players_4_pots_different_winners_with_folding_players():
 
     assert len(game_first.pots) == 4
 
-    assert len(player_1.user.money) == 0
-    assert len(player_2.user.money) == 700
-    assert len(player_3.user.money) == 0
-    assert len(player_4.user.money) == 150
-    assert len(player_5.user.money) == 950
-    assert len(player_6.user.money) == 900
+    assert player_1.best_hand.__repr__() == player_1_best_hand.__repr__()
+    assert player_2.best_hand.__repr__() == player_2_best_hand.__repr__()
+    assert player_3.best_hand.__repr__() == player_3_best_hand.__repr__()
+    assert player_4.best_hand.__repr__() == player_4_best_hand.__repr__()
+    assert player_5.best_hand.__repr__() == player_5_best_hand.__repr__()
+    assert player_6.best_hand.__repr__() == player_6_best_hand.__repr__()
+    
+    assert player_1.user.money == 0
+    assert player_2.user.money == 700
+    assert player_3.user.money == 0
+    assert player_4.user.money == 150
+    assert player_5.user.money == 950
+    assert player_6.user.money == 900
+
+if __name__ == "__main__":
+    retcode = pytest.main(["test/game/test_game_6pl.py"])

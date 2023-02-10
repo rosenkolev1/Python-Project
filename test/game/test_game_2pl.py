@@ -35,10 +35,22 @@ def test_2_players_always_raise_one_or_both_all_in(user_first: User, user_second
     player_second = BotPlayer(user_second, ChooseActionFactory.create_choose_action_always_raise_if_possible())
 
     player_first_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.EIGHT, Suit.DIAMONDS)
+        ])
 
     player_second_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.DIAMONDS)])
+        [
+            Card(Rank.FOUR, Suit.DIAMONDS), 
+            Card(Rank.FOUR, Suit.CLUBS), 
+            Card(Rank.SEVEN, Suit.CLUBS), 
+            Card(Rank.ACE, Suit.HEARTS), 
+            Card(Rank.SEVEN, Suit.DIAMONDS)
+        ])
 
     game_first = Game(default_game_settings(preset_deck))
     game_first.add_player(player_first)
