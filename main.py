@@ -50,39 +50,24 @@ player_third = HumanPlayer(user_third)
 
 player_first__preset_actions = ChooseActionFactory.create_choose_action_predetermined_human_player(
     [
-        PlayerAction(PlayerActionType.CALL, 50), #Pre-flop
-        PlayerAction(PlayerActionType.CALL, 1),
-        PlayerAction(PlayerActionType.CALL, 10), #Flop
-        PlayerAction(PlayerActionType.RAISE, 2),
-        PlayerAction(PlayerActionType.CALL, 4),
-        PlayerAction(PlayerActionType.BET, 10), #Turn
-        PlayerAction(PlayerActionType.RAISE, 3),
-        PlayerAction(PlayerActionType.ALL_IN, 20), #River
+        PlayerAction(PlayerActionType.CALL, 25), #Pre-flop
+        PlayerAction(PlayerActionType.CALL, 2),
+        PlayerAction(PlayerActionType.FOLD, 0), #Flop
     ]
 )
 
 player_second__preset_actions = ChooseActionFactory.create_choose_action_predetermined_human_player(
     [
-        PlayerAction(PlayerActionType.CALL, 25), #Pre-flop
-        PlayerAction(PlayerActionType.CALL, 1),
-        PlayerAction(PlayerActionType.CHECK, 0), #Flop
-        PlayerAction(PlayerActionType.RAISE, 1),
-        PlayerAction(PlayerActionType.RAISE, 2),
-        PlayerAction(PlayerActionType.FOLD, 0), #Turn
+        PlayerAction(PlayerActionType.RAISE, 2), #Pre-flop
+        PlayerAction(PlayerActionType.ALL_IN, 173), #Flop
     ]
 )
 
 player_third__preset_actions = ChooseActionFactory.create_choose_action_predetermined_human_player(
     [
-        PlayerAction(PlayerActionType.RAISE, 1), #Pre-flop
-        PlayerAction(PlayerActionType.BET, 10), #Flop
-        PlayerAction(PlayerActionType.CALL, 1),
-        PlayerAction(PlayerActionType.CALL, 4),  
-        PlayerAction(PlayerActionType.CHECK, 0), #Turn
-        PlayerAction(PlayerActionType.RAISE, 1),
-        PlayerAction(PlayerActionType.CALL, 3),
-        PlayerAction(PlayerActionType.CHECK, 0), #River
-        PlayerAction(PlayerActionType.CALL, 0),
+        PlayerAction(PlayerActionType.CALL, 25), #Pre-flop
+        PlayerAction(PlayerActionType.CALL, 2),
+        PlayerAction(PlayerActionType.FOLD, 0), #Flop
     ]
 )
 
@@ -91,6 +76,7 @@ player_second.predefine_choose_action(player_second__preset_actions)
 player_third.predefine_choose_action(player_third__preset_actions)
 
 preset_deck = PresetDeck(3, 2)
+
 preset_deck.preset_player_cards(0, [
     Card(Rank.EIGHT, Suit.CLUBS),
     Card(Rank.EIGHT, Suit.DIAMONDS)
@@ -117,15 +103,15 @@ preset_deck.preset_community(
 )
 
 game_settings = (GameSetting()
-            .enable_big_blind(50)
+            # .enable_big_blind(50)
             .enable_small_blind(25)
             .set_dealer(0)
             .set_small_blind_holder(1)
-            .set_big_blind_holder(2)
+            # .set_big_blind_holder(2)
             .set_hand_visibility(HandVisibilitySetting.ALL)
             .set_deck(Deck())
             )
-game_settings.set_deck(preset_deck)
+# game_settings.set_deck(preset_deck)
 
 game_first = Game(game_settings)
 game_first.add_player(player_first)

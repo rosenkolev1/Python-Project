@@ -43,7 +43,6 @@ class Pot:
 
         players_not_all_in: List[Player] = list(map(lambda player: not player.is_all_in, self.get_players_not_folded()))
         
-        # return any(players_all_in) and not all(players_all_in) and len(players_not_all_in) > 2
         return any(players_all_in) and not all(players_all_in)
 
     def all_players_have_folded(self) -> bool:

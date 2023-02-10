@@ -386,18 +386,21 @@ class Game:
                 self.play_showdown()
                 break
             elif round_over and len(self.current_pot.get_players_not_folded()) == 1:          
-                # In this case, there is only the main pot and all but one players have folded it, so no need to get all 5 community cards
+                # In this case, there is only the main pot and all but one players have folded it, 
+                # So no need to get all 5 community cards
                 if len(self.pots) == 1:           
                     self.payout()
                 
-                # In this case, there is one remaining person on the main pot, but there is at least one other person who is all-in on a side pot
+                # In this case, there is one remaining person on the main pot, 
+                # but there is at least one other person who is all-in on a side pot
                 # This means that we have to deal all the community cards
                 else:
                     self.deal_until_showdown()
                     self.play_showdown()                  
                 break
-            #In this case, all the players of the main pot are all-in, so just proceed to get all the community cards out and play the showdown
-            elif round_over and self.current_pot.all_players_are_all_in():
+            # In this case, all the players of the main pot(who have not folded) are all-in, 
+            # So just proceed to get all the community cards out and play the showdown
+            elif round_over and len(self.current_pot.get_players_not_folded_and_not_all_in()) == 0:
                 self.deal_until_showdown()
                 self.play_showdown()
                 break   
