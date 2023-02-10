@@ -39,11 +39,25 @@ class Pot:
         return True
 
     def should_be_split(self) -> bool:
-        players_all_in: List[Player] = list(map(lambda player: player.is_all_in, self.get_players_not_folded()))
+        active_players: List[Player] = self.get_players_not_folded()
 
-        players_not_all_in: List[Player] = list(map(lambda player: not player.is_all_in, self.get_players_not_folded()))
+        players_all_in: List[Player] = list(map(lambda player: player.is_all_in, active_players))
+
+        should_split_condition_1: bool = any(players_all_in) and not all(players_all_in)
+
+        if should_split_condition_1:
+            return True
+
+        active_players_have_same_stakes: bool = True
+
+        for i in range(0, len(active_players) - 1):
+            player_1: Player = active_players[i]
+            player_2: Player = active_players[i+1]
+
+            if player_1.stake != player_2.stake:
+                return True
         
-        return any(players_all_in) and not all(players_all_in)
+        return False
 
     def all_players_have_folded(self) -> bool:
         return len(self.get_players_not_folded()) > 0
