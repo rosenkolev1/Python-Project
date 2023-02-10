@@ -158,5 +158,5 @@ class GameUI:
             action_str = GameUI.action_command_prompt(player, action, call_amount)
             action_strings.append(action_str)
 
-        res = f"Choose an action ({' | '.join(action_strings)}): "
+        res = f"Player: {player.user.name}, it is your turn. Choose an action ({' | '.join(action_strings)}): "
         return res

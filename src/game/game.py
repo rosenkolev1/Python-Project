@@ -3,6 +3,8 @@ from typing import List, Tuple
 
 from src.game.deck.card import Card
 from src.game.hand.hand import Hand
+from src.game.player.bot_player import BotPlayer
+from src.game.player.human_player import HumanPlayer
 from src.game.player.player_action import PlayerAction
 from src.game.player.player_action_type import PlayerActionType
 
@@ -11,6 +13,7 @@ from src.game.deck.deck import Deck
 from src.game.game_round import GameRound
 from src.game.pot import Pot
 from src.game.setting.game_setting import GameSetting
+from src.game.setting.hand_visibility_setting import HandVisibilitySetting
 from src.game.user_interface.game_ui import GameUI
 
 class Game:
@@ -75,9 +78,15 @@ class Game:
         print(GameUI.GAME_ENDING_INFO_PROMPT)
 
     def _validate_money_for_big_blind_bet(self, money: float) -> None:
-        #TODO: Change this depending on the game settings
-        if money < self.settings.big_blind_bet:
-            raise ValueError("The player that you are trying to add has less money than required to enter the game!")
+        if self.settings.big_blind_enabled:
+            if money < self.settings.big_blind_bet:
+                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
+        elif self.settings.small_blind_enabled:
+            if money < self.settings.small_blind_bet:
+                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
+        elif self.settings.ante_enabled:
+            if money < self.settings.ante_amount:
+                raise ValueError("The player that you are trying to add has less money than required to enter the game!")
         
     def add_player(self, player: Player) -> None:
         self._validate_money_for_big_blind_bet(player.user.money)
@@ -111,11 +120,23 @@ class Game:
         for i in range(2):         
             for player in self.players:
                 player.cards.append(self.settings.deck.cards.pop())
-            
-        for player in self.players: 
+        
+        visible_players: List[Player] = None
+
+        if self.settings.hand_visibility_setting == HandVisibilitySetting.ALL: 
+            visible_players = self.players
+        elif self.settings.hand_visibility_setting == HandVisibilitySetting.NONE:
+            visible_players = []
+        elif self.settings.hand_visibility_setting == HandVisibilitySetting.BOTS_ONLY:
+            visible_players = list(filter(lambda x: isinstance(x, BotPlayer), self.players))
+        elif self.settings.hand_visibility_setting == HandVisibilitySetting.HUMANS_ONLY:
+            visible_players = list(filter(lambda x: isinstance(x, HumanPlayer), self.players))
+
+        for player in visible_players:
             print(GameUI.player_dealt_cards_info_prompt(player))
             
-        print()
+        if len(visible_players) > 0:
+            print()
 
     def _deal_flop(self):
         self.settings.deck.cards.pop()
@@ -190,7 +211,7 @@ class Game:
             #The player can always choose to go all-in
             possible_actions.append(PlayerActionType.ALL_IN)
 
-            #In this case, there has been a bet this round already (big blind during pre-flop counts as a bet)
+            #In this case, there has been a bet this round already (big blind and small blind during pre-flop counts as a bet)
             if 0 != pot.current_highest_stake:
                 highest_stake_diff: float = pot.current_highest_stake - stake
 
@@ -204,8 +225,11 @@ class Game:
 
                 can_raise: bool = not calling_is_all_in and any(map(lambda x: x != player and not x.is_all_in, pot.players))
 
-                if not calling_is_all_in:
+                if call_amount > 0 and not calling_is_all_in:
                     possible_actions.append(PlayerActionType.CALL)
+
+                if call_amount == 0:
+                    possible_actions.append(PlayerActionType.CHECK)
 
                 if can_raise:
                     possible_actions.append(PlayerActionType.RAISE)
@@ -213,8 +237,9 @@ class Game:
             else:
                 possible_actions.append(PlayerActionType.CHECK)
                 
-                #This is only possible for the big_blind_holder during the pre-flop, where can either choose to Check or to raise the big_blind
-                if stake == pot.current_highest_stake and stake == 0:                    
+                #This is only possible for the big_blind_holder during the pre-flop, 
+                #Where they can either choose to Check or to raise the big_blind
+                if stake == pot.current_highest_stake:                    
                     possible_actions.append(PlayerActionType.RAISE)
                 else:
                     possible_actions.append(PlayerActionType.BET)
@@ -225,49 +250,38 @@ class Game:
         player = self.current_player
         pot = self.current_pot
         
-        #This should normally be impossible, but just in case
-        if player.is_all_in:
-            pass
-            #Debug
-            # print(f"Player: {player.user.name} is all in with amount {pot.get_stake_for_player(player)}! Their current balance is {player.user.money}\n")
-        #This should normally be impossible, but just in case
-        elif player.has_folded:
-            pass
-            #Debug
-            # print(f"Player: {player.user.name} has folded! Their current balance is {player.user.money}\n")
-        else:
-            #Determine the possible actions
-            possible_actions, call_amount = self.get_possible_actions(player, pot)
+        #Determine the possible actions
+        possible_actions, call_amount = self.get_possible_actions(player, pot)
 
-            action: PlayerAction = player.choose_action(possible_actions, call_amount)
+        action: PlayerAction = player.choose_action(possible_actions, call_amount)
 
-            is_all_in: bool = action.type == PlayerActionType.ALL_IN
-            is_all_in_and_raise: bool = is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake
+        is_all_in: bool = action.type == PlayerActionType.ALL_IN
+        is_all_in_and_raise: bool = is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake
 
-            if action.type == PlayerActionType.FOLD:
-                player.has_folded = True
-            elif action.type == PlayerActionType.RAISE or action.type == PlayerActionType.BET or is_all_in_and_raise:
-                #For each player that has not folded or is not all-in, reset their has_played_turn state
-                for other_player in self.players:
-                    if not other_player.has_folded and not other_player.is_all_in:
-                        other_player.has_played_turn = False
+        if action.type == PlayerActionType.FOLD:
+            player.has_folded = True
+        elif action.type == PlayerActionType.RAISE or action.type == PlayerActionType.BET or is_all_in_and_raise:
+            #For each player that has not folded or is not all-in, reset their has_played_turn state
+            for other_player in self.players:
+                if not other_player.has_folded and not other_player.is_all_in:
+                    other_player.has_played_turn = False
 
-            if action.type != PlayerActionType.FOLD and action.type != PlayerActionType.CHECK:
-                pot.place_bet(player, action.amount)
-                
-                #In this case, we are not all-in
-                if not is_all_in:
-                    if action.type == PlayerActionType.RAISE:
-                        print(GameUI.player_raising_info_prompt(player, action, call_amount))
-                    else:
-                        print(GameUI.player_bet_or_call_info_prompt(player, action))
+        if action.type != PlayerActionType.FOLD and action.type != PlayerActionType.CHECK:
+            pot.place_bet(player, action.amount)
+            
+            #In this case, we are not all-in
+            if not is_all_in:
+                if action.type == PlayerActionType.RAISE:
+                    print(GameUI.player_raising_info_prompt(player, action, call_amount))
                 else:
-                    print(GameUI.player_all_in_info_prompt(player, action))
-                    
-            elif action.type == PlayerActionType.FOLD:
-                print(GameUI.player_fold_info_prompt(player))
-            elif action.type == PlayerActionType.CHECK:
-                print(GameUI.player_check_info_prompt(player))
+                    print(GameUI.player_bet_or_call_info_prompt(player, action))
+            else:
+                print(GameUI.player_all_in_info_prompt(player, action))
+                
+        elif action.type == PlayerActionType.FOLD:
+            print(GameUI.player_fold_info_prompt(player))
+        elif action.type == PlayerActionType.CHECK:
+            print(GameUI.player_check_info_prompt(player)) 
 
         player.has_played_turn = True
         

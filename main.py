@@ -21,19 +21,35 @@ from src.game.player.choose_action_factory import ChooseActionFactory
 user_first = User("Roskata", 100)
 user_second = User("Stefan", 200)
 
-player_first = BotPlayer(user_first, ChooseActionFactory.create_choose_action_always_random(
-    [PlayerActionType.ALL_IN, PlayerActionType.FOLD], PlayerActionType.ALL_IN
-))
-player_second = BotPlayer(user_second, ChooseActionFactory.create_choose_action_always_random(
-    [PlayerActionType.ALL_IN, PlayerActionType.FOLD], PlayerActionType.ALL_IN
-))
+# player_first = BotPlayer(user_first, ChooseActionFactory.create_choose_action_always_random(
+#     [PlayerActionType.ALL_IN, PlayerActionType.FOLD], PlayerActionType.ALL_IN
+# ))
+player_first = HumanPlayer(user_first)
+
+# player_second = BotPlayer(user_second, ChooseActionFactory.create_choose_action_always_random(
+#     [PlayerActionType.ALL_IN, PlayerActionType.FOLD], PlayerActionType.ALL_IN
+# ))
+
+# player_second = BotPlayer(user_second, ChooseActionFactory.create_choose_action_predetermined(
+#     [PlayerAction(PlayerActionType.CALL, 0)]
+# ))
+
+player_second = HumanPlayer(user_second)
+
+# player_second = HumanPlayer(user_second)
+# player_second.choose_action = lambda possible_actions, call_amount: ChooseActionFactory.create_choose_action_always_random(
+#     [PlayerActionType.ALL_IN, PlayerActionType.FOLD], PlayerActionType.ALL_IN
+# )(player_second, possible_actions, call_amount)
+# player_second.predefine_choose_action(ChooseActionFactory.create_choose_action_always_random(
+#     [PlayerActionType.ALL_IN, PlayerActionType.FOLD], PlayerActionType.ALL_IN
+# ))
 
 game_settings = GameSetting()
-game_settings.enable_big_blind(50)
+# game_settings.enable_big_blind(50)
 game_settings.enable_small_blind(25)
 game_settings.set_dealer(0)
 game_settings.set_small_blind_holder(1)
-game_settings.set_big_blind_holder(2)
+# game_settings.set_big_blind_holder(2)
 game_settings.set_hand_visibility(HandVisibilitySetting.ALL)
 game_settings.set_deck(Deck())
 

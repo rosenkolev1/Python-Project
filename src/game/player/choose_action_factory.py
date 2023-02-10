@@ -60,6 +60,9 @@ class ChooseActionFactory:
             if predetermined_action.type == PlayerActionType.RAISE:
                 amount += call_amount
 
+            if predetermined_action.type == PlayerActionType.CALL:
+                amount = call_amount
+
             action_index += 1
             
             return PlayerAction(predetermined_action.type, amount)
@@ -82,7 +85,7 @@ class ChooseActionFactory:
             else:
                 action_type = possible_actions_filtered[random.randint(0, len(possible_actions_filtered) - 1)] 
 
-            amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+            amount: float = min(call_amount + random.randint(1, 50), self.user.money - 1)
 
             if action_type == PlayerActionType.CALL:
                 amount = call_amount
