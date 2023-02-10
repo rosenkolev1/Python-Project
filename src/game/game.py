@@ -58,8 +58,12 @@ class Game:
 
         if self.settings.ante_enabled:
             for player in self.players:
-                main_pot.place_bet(player, self.settings.ante_amount)
-                print(GameUI.ante_entered_info_prompt(player, self.settings.ante_amount))
+                main_pot.place_bet(player, self.settings.ante_bet)
+
+                print(GameUI.ante_entered_info_prompt(player, self.settings.ante_bet))
+
+            # The ante bets do not count towards the current_highest_stake of the pot
+            main_pot.current_highest_stake = 0
             print()
 
         if self.settings.small_blind_enabled:

@@ -10,6 +10,7 @@ from src.game.hand.hand_combination import HandCombination
 from src.game.player.player_action_type import PlayerActionType
 from src.game.setting.game_setting import GameSetting
 from src.game.setting.hand_visibility_setting import HandVisibilitySetting
+from src.game.setting.invalid_money_for_settings_exception import InvalidMoneyForSettingsException
 from src.table.table import Table
 from src.user.user import User
 from src.game.player.player import Player
@@ -18,12 +19,10 @@ from src.game.player.human_player import HumanPlayer
 from src.game.player.player_action import PlayerAction
 from src.game.player.choose_action_factory import ChooseActionFactory
 
-users_original_money = [100, 150, 200, 250, 1000, 1000]
-
-user_1 = User("Roskata", 100)
-user_2 = User("Stefan", 150)
-user_3 = User("Kris", 200)
-user_4 = User("Miro", 250)
+user_1 = User("Roskata", 1000)
+user_2 = User("Stefan", 1000)
+user_3 = User("Kris", 1000)
+user_4 = User("Miro", 1000)
 user_5 = User("Ge6a", 1000)
 user_6 = User("Pe6o", 1000)
 
@@ -63,26 +62,55 @@ bot_player_6.predefine_choose_action(ChooseActionFactory.create_choose_action_al
 game_settings = (GameSetting()
             .enable_big_blind(50, 2)
             .enable_small_blind(25, 1)
+            # .enable_ante(10)
             .set_dealer(0)
             .set_hand_visibility(HandVisibilitySetting.ALL)
-            .enable_ante(25)
             .set_deck(Deck())
             )
-# game_settings.set_deck(preset_deck)
 
-game_first = Game(game_settings)
-game_first.add_player(bot_player_1)
-game_first.add_player(bot_player_2)
-game_first.add_player(bot_player_3)
-game_first.add_player(bot_player_4)
-game_first.add_player(bot_player_5)
-game_first.add_player(bot_player_6)
+# game_1 = Game(game_settings)
+# game_1.add_player(human_player_1)
+# game_1.add_player(human_player_2)
+# game_1.add_player(human_player_3)
+# game_1.add_player(human_player_4)
+# game_1.add_player(human_player_5)
+# game_1.add_player(human_player_6)
 
-# game_first.add_player(human_player_1)
-# game_first.add_player(human_player_2)
-# game_first.add_player(human_player_3)
-# game_first.add_player(human_player_4)
-# game_first.add_player(human_player_5)
-# game_first.add_player(human_player_6)
+# game_1.start_game()
 
-game_first.start_game()
+table_1 = Table(game_settings)
+
+table_1.add_user(user_1)
+table_1.add_user(user_2)
+table_1.add_user(user_3)
+table_1.add_user(user_4)
+table_1.add_user(user_5)
+table_1.add_user(user_6)
+
+#Create a table and play games until there is a single winner left
+print("The tournament begins!\n\n")
+
+while True:
+    table_1.new_game()
+
+    for user in table_1.users:
+        try:
+            table_1.current_game.add_player
+            (
+                BotPlayer(user, ChooseActionFactory.create_choose_action_always_random(
+                        [PlayerActionType.FOLD, PlayerActionType.ALL_IN], PlayerActionType.ALL_IN
+                    ))
+            )
+        except InvalidMoneyForSettingsException as e:
+            table_1.users.remove(user)
+
+    if len(table_1.users) == 1:
+        print(f"The winner of the tournament is {table_1.users[0].name}")
+
+    table_1.start_game()
+
+    if table_1.game_history % 5 == 0:
+        game_settings.big_blind_bet += 5
+        game_settings.small_blind_bet = game_settings.big_blind_bet / 2
+
+    table_1.rotate_button()

@@ -11,7 +11,7 @@ class Table:
         self.game_settings = game_setting
         self.users: List[User] = []
         self.current_game: Game = None
-        self.total_games: List[Game] = []
+        self.game_history: List[Game] = []
 
         self.has_rotated_button = False
     
@@ -25,6 +25,7 @@ class Table:
             self.game_settings.set_big_blind_holder(1)
 
         self.current_game.start_game()
+        self.game_history.append(self.current_game)
 
     def reset_button(self):
         self.game_settings.set_dealer(0)

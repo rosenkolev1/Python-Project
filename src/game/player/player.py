@@ -42,7 +42,9 @@ class Player(ABC):
             possible_actions.append(PlayerActionType.FOLD)
             stake = pot.get_stake_for_player(self)
 
-            #In this case, there has been a bet this round already (big blind and small blind during pre-flop counts as a bet)
+            #In this case, there has been a bet this round already 
+            # Big blind and Small blind during pre-flop counts as a bet
+            # Antes do not count as bets
             if pot.current_highest_stake != 0:
                 highest_stake_diff: float = pot.current_highest_stake - stake
 
@@ -72,13 +74,6 @@ class Player(ABC):
             else:
                 possible_actions.append(PlayerActionType.ALL_IN)
                 possible_actions.append(PlayerActionType.CHECK)
-                
-                #This is only possible for the big_blind_holder during the pre-flop, 
-                #Where they can either choose to Check or to raise the big_blind
-                # if stake == pot.current_highest_stake:                    
-                #     possible_actions.append(PlayerActionType.RAISE)
-                # else:
-                #     possible_actions.append(PlayerActionType.BET)
                 possible_actions.append(PlayerActionType.BET)
 
         return (possible_actions, call_amount)
