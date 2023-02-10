@@ -8,13 +8,6 @@ from src.user.user import User
 class Table:
 
     def __init__(self, game_setting: GameSetting) -> None:
-        # self.dealer_index: int = 0
-
-        # self.small_blind_bet: float = small_blind_bet
-        # self.small_blind_holder: int = 1
-        
-        # self.big_blind_bet: float = big_blind_bet
-        # self.big_blind_holder: int = 2 
         self.game_settings = game_setting
         self.users: List[User] = []
         self.current_game: Game = None
@@ -30,15 +23,6 @@ class Table:
         if self.current_game.two_player_game and not self.has_rotated_button:
             self.game_settings.set_small_blind_holder(0)
             self.game_settings.set_big_blind_holder(1)
-
-        # self.current_game.settings = self.game_settings
-
-        # self.current_game.small_blind_bet = self.game_settings.small_blind_bet
-        # self.current_game.big_blind_bet = self.game_settings.big_blind_bet
-
-        # self.current_game.dealer_index = self.game_settings.dealer_index
-        # self.current_game.small_blind_holder = self.game_settings.small_blind_holder
-        # self.current_game.big_blind_holder = self.game_settings.big_blind_holder
 
         self.current_game.start_game()
 

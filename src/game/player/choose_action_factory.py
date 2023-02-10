@@ -67,39 +67,57 @@ class ChooseActionFactory:
         return mock_choose_action
 
     @staticmethod
-    def choose_action_always_random(self: Player, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
-        #Choose randomly
-        action_type: PlayerActionType = possible_actions[random.randint(0, len(possible_actions) - 1)]
-        amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+    def create_choose_action_always_random(excluding_actions: List[PlayerActionType] = [], 
+                                           back_up_action: PlayerActionType = PlayerActionType.FOLD) -> PlayerActionType:
+        
+        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], call_amount: float):
+            #Filter available actions
+            possible_actions_filtered: List[PlayerActionType] = list(filter(lambda x: x not in excluding_actions, possible_actions))
 
-        if action_type == PlayerActionType.CALL:
-            amount = call_amount
-        elif action_type == PlayerActionType.ALL_IN:
-            amount = self.user.money
+            #Choose randomly
+            action_type: PlayerActionType = None
 
-        return PlayerAction(action_type, amount)
+            if len(possible_actions_filtered) == 0:
+                action_type = back_up_action
+            else:
+                action_type = possible_actions_filtered[random.randint(0, len(possible_actions_filtered) - 1)] 
+
+            amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+
+            if action_type == PlayerActionType.CALL:
+                amount = call_amount
+            elif action_type == PlayerActionType.ALL_IN:
+                amount = self.user.money
+
+            return PlayerAction(action_type, amount)
+
+        return mock_choose_action
 
     @staticmethod
-    def choose_action_always_raise_if_possible(self: Player, possible_actions: List[PlayerActionType], call_amount: float) -> PlayerActionType:
-        action_type: PlayerActionType = None
+    def create_choose_action_always_raise_if_possible() -> PlayerActionType:
         
-        if PlayerActionType.RAISE in possible_actions:        
-            action_type = PlayerActionType.RAISE
-        elif PlayerActionType.BET in possible_actions:
-            action_type = PlayerActionType.BET
-        elif PlayerActionType.CALL in possible_actions:
-            action_type = PlayerActionType.CALL
-        elif PlayerActionType.BET in possible_actions:
-            action_type = PlayerActionType.ALL_IN
+        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], call_amount: float):
+            action_type: PlayerActionType = None
+            
+            if PlayerActionType.RAISE in possible_actions:        
+                action_type = PlayerActionType.RAISE
+            elif PlayerActionType.BET in possible_actions:
+                action_type = PlayerActionType.BET
+            elif PlayerActionType.CALL in possible_actions:
+                action_type = PlayerActionType.CALL
+            elif PlayerActionType.BET in possible_actions:
+                action_type = PlayerActionType.ALL_IN
 
-        if action_type == PlayerActionType.CALL:
-            return PlayerAction(action_type, call_amount)
-        elif action_type == PlayerActionType.ALL_IN:
-            return PlayerAction(action_type, self.user.money)
- 
-        amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+            if action_type == PlayerActionType.CALL:
+                return PlayerAction(action_type, call_amount)
+            elif action_type == PlayerActionType.ALL_IN:
+                return PlayerAction(action_type, self.user.money)
+    
+            amount: float = min(call_amount + random.randint(1, 50), self.user.money)
 
-        if amount == self.user.money:
-            action_type = PlayerActionType.ALL_IN
+            if amount == self.user.money:
+                action_type = PlayerActionType.ALL_IN
 
-        return PlayerAction(action_type, amount)
+            return PlayerAction(action_type, amount)
+
+        return mock_choose_action

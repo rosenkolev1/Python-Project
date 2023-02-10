@@ -1,6 +1,5 @@
 import functools
 from typing import List, Tuple
-from multipledispatch import dispatch
 
 from src.game.deck.card import Card
 from src.game.hand.hand import Hand
@@ -17,19 +16,10 @@ from src.game.user_interface.game_ui import GameUI
 class Game:
 
     def __init__(self, game_setting: GameSetting) -> None:
-        # self.deck: Deck = game_setting.deck
-
-        # self.turn: int = game_setting.turn
-        # self.dealer_index: int = game_setting.dealer_index
-
-        # self.small_blind_bet: float = game_setting.small_blind_bet
-        # self.small_blind_holder: int = game_setting.small_blind_holder
-
-        # self.big_blind_bet: float = game_setting.big_blind_bet
-        # self.big_blind_holder: int = game_setting.big_blind_holder
-
         self.settings: GameSetting = game_setting
         
+        self.turn: int = 0
+
         self.community_cards: List[Card] = []
         
         self.pots: List[Pot] = []
@@ -47,21 +37,30 @@ class Game:
 
         #TODO: Change depending on the game setting
         if self.is_two_player_game and self.table is None:
-            self.settings.small_blind_holder = 0
-            self.settings.big_blind_holder = 1
+            if self.settings.small_blind_enabled:
+                self.settings.small_blind_holder = 0
+            if self.settings.big_blind_enabled:
+                self.settings.big_blind_holder = 1
 
         print(GameUI.dealer_info_prompt(self))
-        print(GameUI.small_blind_player_info_prompt(self))
-        print(GameUI.big_blind_player_info_prompt(self))
+
+        if self.settings.small_blind_enabled:
+            print(GameUI.small_blind_player_info_prompt(self))
+        
+        if self.settings.big_blind_enabled:
+            print(GameUI.big_blind_player_info_prompt(self))
+
         print(GameUI.players_list_info_prompt(self))
         
         main_pot: Pot = Pot()
 
-        main_pot.place_bet(self.small_blind_player, self.settings.small_blind_bet)
-        main_pot.place_bet(self.big_blind_player, self.settings.big_blind_bet)
-        
-        print(GameUI.small_blind_entered_info_prompt(self))
-        print(GameUI.big_blind_entered_info_prompt(self))
+        if self.settings.small_blind_enabled:
+            main_pot.place_bet(self.small_blind_player, self.settings.small_blind_bet)
+            print(GameUI.small_blind_entered_info_prompt(self))
+
+        if self.settings.big_blind_enabled:
+            main_pot.place_bet(self.big_blind_player, self.settings.big_blind_bet)
+            print(GameUI.big_blind_entered_info_prompt(self))
 
         self.pots.append(main_pot)
         self.current_pot_index = 0
@@ -76,6 +75,7 @@ class Game:
         print(GameUI.GAME_ENDING_INFO_PROMPT)
 
     def _validate_money_for_big_blind_bet(self, money: float) -> None:
+        #TODO: Change this depending on the game settings
         if money < self.settings.big_blind_bet:
             raise ValueError("The player that you are trying to add has less money than required to enter the game!")
         
@@ -101,7 +101,7 @@ class Game:
 
     def next_turn(self) -> None:
         while True:
-            self.settings.turn = self.__next_index(self.settings.turn)
+            self.turn = self.__next_index(self.turn)
             
             if not self.current_player.has_played_turn:
                 break
@@ -160,10 +160,18 @@ class Game:
 
         #Set the first person to act during the round. If we are in pre-flop, then that is the person after the big_blind_holder.
         #Else, it is the person after the dealer(the small_blind_holder, who is inbetween the dealer and the big_blind_holder)
+        #There is a big_blind_holder in the game, 
+        #Otherwise, we start from the person to the right of the small_blind_holder during pre-flop
+        #If there is also no small_blind_holder, then we start to the right of the dealer(button) for all rounds
         if self.round == GameRound.Pre_Flop:
-            self.settings.turn = self.settings.big_blind_holder
+            if self.settings.big_blind_enabled:
+                self.turn = self.settings.big_blind_holder
+            elif self.settings.small_blind_enabled:
+                self.turn = self.settings.small_blind_holder
+            else:
+                self.turn = self.settings.dealer_index
         else:
-            self.settings.turn = self.settings.dealer_index    
+            self.turn = self.settings.dealer_index    
 
         self.deal_cards()
 
@@ -438,7 +446,7 @@ class Game:
 
     @property
     def current_player(self) -> Player:
-        return self.players[self.settings.turn]
+        return self.players[self.turn]
 
     @property
     def big_blind_player(self) -> Player:

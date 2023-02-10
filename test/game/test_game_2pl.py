@@ -31,8 +31,8 @@ def test_2_players_always_raise_one_or_both_all_in(user_first: User, user_second
     preset_deck.preset_turn(Card(Rank.SEVEN, Suit.CLUBS))
     preset_deck.preset_river(Card(Rank.ACE, Suit.HEARTS))
 
-    player_first = BotPlayer(user_first, ChooseActionFactory.choose_action_always_raise_if_possible)
-    player_second = BotPlayer(user_second, ChooseActionFactory.choose_action_always_raise_if_possible)
+    player_first = BotPlayer(user_first, ChooseActionFactory.create_choose_action_always_raise_if_possible())
+    player_second = BotPlayer(user_second, ChooseActionFactory.create_choose_action_always_raise_if_possible())
 
     player_first_best_hand = Hand(
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
@@ -51,6 +51,8 @@ def test_2_players_always_raise_one_or_both_all_in(user_first: User, user_second
 
     assert game_first.players[0].best_hand.__repr__() == player_first_best_hand.__repr__()
     assert game_first.players[1].best_hand.__repr__() == player_second_best_hand.__repr__()
+
+
 
 if __name__ == "__main__":
     retcode = pytest.main()

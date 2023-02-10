@@ -33,9 +33,9 @@ def test_3_players_always_raise(user_first: User, user_second: User, user_third:
     preset_deck.preset_turn(Card(Rank.SEVEN, Suit.CLUBS))
     preset_deck.preset_river(Card(Rank.ACE, Suit.HEARTS))
 
-    player_first = BotPlayer(user_first, ChooseActionFactory.choose_action_always_raise_if_possible)
-    player_second = BotPlayer(user_second, ChooseActionFactory.choose_action_always_raise_if_possible)
-    player_third = BotPlayer(user_third, ChooseActionFactory.choose_action_always_raise_if_possible)
+    player_first = BotPlayer(user_first, ChooseActionFactory.create_choose_action_always_raise_if_possible())
+    player_second = BotPlayer(user_second, ChooseActionFactory.create_choose_action_always_raise_if_possible())
+    player_third = BotPlayer(user_third, ChooseActionFactory.create_choose_action_always_raise_if_possible())
 
     player_first_best_hand = Hand(
         [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])

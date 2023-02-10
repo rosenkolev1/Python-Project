@@ -9,7 +9,7 @@ class GameSetting:
         self.deck: Deck = None
 
         self.override_turn_enabled = False
-        self.turn: int = 0
+        # self.turn: int = 0
 
         self.dealer_index: int = 0
 
@@ -24,8 +24,8 @@ class GameSetting:
         self.ante_enabled: bool = None
         self.ante_amount: float = None
 
-        self.raise_minimum_amount: float = None
-        self.raise_maximum_amount: float = None
+        self.bet_minimum_amount: float = None
+        self.bet_maximum_amount: float = None
 
         self.hand_visibility_setting: HandVisibilitySetting = None
 
@@ -59,7 +59,7 @@ class GameSetting:
         self.hand_visibility_setting = setting
         return self
 
-    def set_turn(self, turn: int) -> "GameSetting":
-        self.turn = turn
-        self.override_turn_enabled = True
-        return self
+    # def set_turn(self, turn: int) -> "GameSetting":
+    #     self.turn = turn
+    #     self.override_turn_enabled = True
+    #     return self
