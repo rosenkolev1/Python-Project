@@ -42,13 +42,13 @@ class Hand:
         else:
             combination: HandCombination = first.combination
 
-            if {combination == HandCombination.STRAIGHT_FLUSH or combination == HandCombination.STRAIGHT
-                or combination == HandCombination.FLUSH}:
+            if (combination == HandCombination.STRAIGHT_FLUSH or combination == HandCombination.STRAIGHT
+                or combination == HandCombination.FLUSH):
 
                 return Hand.compare_kickers(first.kickers_ranks, second.kickers_ranks)
 
             elif combination == HandCombination.FOUR_OF_A_KIND:
-                fours_comparison: int = first.quads_rank - second.quads_rank
+                fours_comparison: int = first.quads_rank.strength - second.quads_rank.strength
 
                 if fours_comparison == 0:
                     return Hand.compare_kickers(first.kickers_ranks, second.kickers_ranks)
@@ -56,15 +56,15 @@ class Hand:
                     return fours_comparison
                 
             elif combination == HandCombination.FULL_HOUSE:
-                triples_comparison: int = first.triple_rank - second.triple_rank
+                triples_comparison: int = first.triple_rank.strength - second.triple_rank.strength
 
                 if triples_comparison == 0:
-                    return first.high_pair_rank - second.high_pair_rank
+                    return first.high_pair_rank.strength - second.high_pair_rank.strength
                 else:
                     return triples_comparison
 
             elif combination == HandCombination.THREE_OF_A_KIND:
-                triples_comparison: int = first.triple_rank - second.triple_rank
+                triples_comparison: int = first.triple_rank.strength - second.triple_rank.strength
 
                 if triples_comparison == 0:
                     return Hand.compare_kickers(first.kickers_ranks, second.kickers_ranks)
@@ -72,10 +72,10 @@ class Hand:
                     return triples_comparison
 
             elif combination == HandCombination.TWO_PAIR:    
-                high_pair_comparison: int = first.high_pair_rank - second.high_pair_rank
+                high_pair_comparison: int = first.high_pair_rank.strength - second.high_pair_rank.strength
 
                 if high_pair_comparison == 0:
-                    low_pair_comparison: int = first.low_pair_rank - second.low_pair_rank
+                    low_pair_comparison: int = first.low_pair_rank.strength - second.low_pair_rank.strength
 
                     if low_pair_comparison == 0:
                         return Hand.compare_kickers(first.kickers_ranks, second.kickers_ranks)
@@ -85,7 +85,7 @@ class Hand:
                     return high_pair_comparison
 
             elif combination == HandCombination.PAIR:
-                high_pair_comparison: int = first.high_pair_rank - second.high_pair_rank
+                high_pair_comparison: int = first.high_pair_rank.strength - second.high_pair_rank.strength
 
                 if high_pair_comparison == 0:
                     return Hand.compare_kickers(first.kickers_ranks, second.kickers_ranks)

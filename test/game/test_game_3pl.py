@@ -14,62 +14,7 @@ from src.user.user import User
 from src.game.deck.card import Card
 from src.game.deck.rank import Rank
 from src.game.deck.suit import Suit
-
-@pytest.mark.skip
-def default_game_settings(preset_deck: PresetDeck) -> GameSetting:
-    game_settings = GameSetting()
-    game_settings.enable_big_blind(50)
-    game_settings.enable_small_blind(25)
-    game_settings.set_dealer(0)
-    game_settings.set_small_blind_holder(1)
-    game_settings.set_big_blind_holder(2)
-    game_settings.set_hand_visibility(HandVisibilitySetting.ALL)
-    game_settings.set_deck(preset_deck)
-
-    return game_settings
-
-@pytest.mark.parametrize("user_first,user_second,user_first_expected_balance,user_second_expected_balance", 
-    [
-        (User("roskata", 100), User("stefan", 200), 0, 300), # roskata is all-in at pre_flop
-        (User("roskata", 200), User("stefan", 200), 0, 400), # roskata and stefan are all-in at pre-flop
-    ])
-def test_2_players_always_raise_one_or_both_all_in(user_first: User, user_second: User, user_first_expected_balance: float, user_second_expected_balance: float):
-    preset_deck = PresetDeck(2, 2)
-
-    preset_deck.preset_player_cards(0, [Card(Rank.TWO, Suit.CLUBS), Card(Rank.EIGHT, Suit.DIAMONDS)])
-    preset_deck.preset_player_cards(1, [Card(Rank.THREE, Suit.CLUBS), Card(Rank.SEVEN, Suit.DIAMONDS)])
-
-    preset_deck.preset_flop([Card(Rank.THREE, Suit.SPADES), Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS)])
-    preset_deck.preset_turn(Card(Rank.SEVEN, Suit.CLUBS))
-    preset_deck.preset_river(Card(Rank.ACE, Suit.HEARTS))
-
-    player_first = BotPlayer(user_first, ChooseActionFactory.choose_action_always_raise_if_possible)
-    player_second = BotPlayer(user_second, ChooseActionFactory.choose_action_always_raise_if_possible)
-
-    player_first_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.EIGHT, Suit.DIAMONDS)])
-
-    player_second_best_hand = Hand(
-        [Card(Rank.FOUR, Suit.DIAMONDS), Card(Rank.FOUR, Suit.CLUBS), Card(Rank.SEVEN, Suit.CLUBS), Card(Rank.ACE, Suit.HEARTS), Card(Rank.SEVEN, Suit.DIAMONDS)])
-
-    # game_settings = GameSetting()
-    # game_settings.enable_big_blind(50)
-    # game_settings.enable_small_blind(25)
-    # game_settings.set_dealer(0)
-    # game_settings.set_hand_visibility(HandVisibilitySetting.ALL)
-    # game_settings.set_deck(preset_deck)
-
-    game_first = Game(default_game_settings(preset_deck))
-    game_first.add_player(player_first)
-    game_first.add_player(player_second)
-
-    game_first.start_game()
-    
-    assert user_first.money == user_first_expected_balance
-    assert user_second.money == user_second_expected_balance
-
-    assert game_first.players[0].best_hand.__repr__() == player_first_best_hand.__repr__()
-    assert game_first.players[1].best_hand.__repr__() == player_second_best_hand.__repr__()
+from test.game.helper.settings_functions import default_game_settings
 
 @pytest.mark.parametrize("user_first,user_second,user_third,user_first_expected_balance,user_second_expected_balance,user_third_expected_balance", 
     [
