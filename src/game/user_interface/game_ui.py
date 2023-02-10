@@ -1,13 +1,13 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
 
-from game.player.player import Player
-from game.player.player_action import PlayerAction
-from game.player.player_action_type import PlayerActionType
-from game.pot import Pot
+from src.game.player.player import Player
+from src.game.player.player_action import PlayerAction
+from src.game.player.player_action_type import PlayerActionType
+from src.game.pot import Pot
 
 if TYPE_CHECKING:
-    from game.game import Game
+    from src.game.game import Game
 
 class GameUI:
     PLAYER_COMMAND_ACTION_MAP = {

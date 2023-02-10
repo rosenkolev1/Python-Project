@@ -1,9 +1,9 @@
 import itertools
 from typing import Dict, List, Set
 
-from game.deck.card import Card
-from game.deck.rank import Rank
-from game.hand.hand_combination import HandCombination
+from src.game.deck.card import Card
+from src.game.deck.rank import Rank
+from src.game.hand.hand_combination import HandCombination
 
 
 class Hand:

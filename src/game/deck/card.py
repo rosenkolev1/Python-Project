@@ -1,5 +1,5 @@
-from game.deck.rank import Rank
-from game.deck.suit import Suit
+from src.game.deck.rank import Rank
+from src.game.deck.suit import Suit
 
 
 class Card:

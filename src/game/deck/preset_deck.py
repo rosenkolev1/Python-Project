@@ -1,8 +1,6 @@
 from typing import List
-from game.deck.card import Card
-from game.deck.deck import Deck
-from game.deck.rank import Rank
-from game.deck.suit import Suit
+from src.game.deck.card import Card
+from src.game.deck.deck import Deck
 
 class PresetDeck(Deck):
     

@@ -2,17 +2,16 @@ import functools
 from typing import List, Tuple
 from multipledispatch import dispatch
 
-from game.deck.card import Card
-from game.hand.hand import Hand
-from game.player.player_action import PlayerAction
-from game.player.player_action_type import PlayerActionType
+from src.game.deck.card import Card
+from src.game.hand.hand import Hand
+from src.game.player.player_action import PlayerAction
+from src.game.player.player_action_type import PlayerActionType
 
-from game.player.player import Player
-from game.deck.deck import Deck
-from game.game_round import GameRound
-from game.pot import Pot
-from game.user import User
-from game.user_interface.game_ui import GameUI
+from src.game.player.player import Player
+from src.game.deck.deck import Deck
+from src.game.game_round import GameRound
+from src.game.pot import Pot
+from src.game.user_interface.game_ui import GameUI
 
 class Game:
 

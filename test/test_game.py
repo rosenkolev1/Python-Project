@@ -1,17 +1,17 @@
 from typing import List
 import pytest
 
-from game.deck.preset_deck import PresetDeck
-from game.game import Game
-from game.hand.hand import Hand
-from game.player.bot_player import BotPlayer
-from game.player.choose_action_factory import ChooseActionFactory
-from game.player.player_action import PlayerAction
-from game.player.player_action_type import PlayerActionType
-from game.user import User
-from game.deck.card import Card
-from game.deck.rank import Rank
-from game.deck.suit import Suit
+from src.game.deck.preset_deck import PresetDeck
+from src.game.game import Game
+from src.game.hand.hand import Hand
+from src.game.player.bot_player import BotPlayer
+from src.game.player.choose_action_factory import ChooseActionFactory
+from src.game.player.player_action import PlayerAction
+from src.game.player.player_action_type import PlayerActionType
+from src.user.user import User
+from src.game.deck.card import Card
+from src.game.deck.rank import Rank
+from src.game.deck.suit import Suit
 
 @pytest.mark.parametrize("user_first,user_second,user_first_expected_balance,user_second_expected_balance", 
     [

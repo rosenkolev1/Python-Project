@@ -1,11 +1,11 @@
 import random
 from typing import List
-from game.player.human_player import HumanPlayer
+from src.game.player.human_player import HumanPlayer
 
-from game.player.player_action import PlayerAction
-from game.player.player_action_type import PlayerActionType
-from game.player.player import Player
-from game.user_interface.game_ui import GameUI
+from src.game.player.player_action import PlayerAction
+from src.game.player.player_action_type import PlayerActionType
+from src.game.player.player import Player
+from src.game.user_interface.game_ui import GameUI
 
 class ChooseActionFactory:
 

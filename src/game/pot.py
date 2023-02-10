@@ -1,5 +1,5 @@
 from typing import List
-from game.player.player import Player
+from src.game.player.player import Player
 
 class Pot:
 

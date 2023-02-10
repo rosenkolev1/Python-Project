@@ -2,9 +2,9 @@ import itertools
 import random
 import typing
 
-from game.deck.card import Card
-from game.deck.rank import Rank
-from game.deck.suit import Suit
+from src.game.deck.card import Card
+from src.game.deck.rank import Rank
+from src.game.deck.suit import Suit
 
 
 class Deck:

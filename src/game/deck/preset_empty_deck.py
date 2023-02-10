@@ -1,7 +1,7 @@
 from typing import List
 
-from game.deck.card import Card
-from game.deck.deck import Deck
+from src.game.deck.card import Card
+from src.game.deck.deck import Deck
 
 class PresetEmptyDeck(Deck):
     

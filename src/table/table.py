@@ -1,8 +1,8 @@
 from typing import List
-from game.deck.deck import Deck
-from game.game import Game
-from game.player.player import Player
-from game.user import User
+from src.game.deck.deck import Deck
+from src.game.game import Game
+from src.game.player.player import Player
+from src.user.user import User
 
 class Table:
 

@@ -1,9 +1,9 @@
 from typing import List, Tuple
-from game.player.player_action import PlayerAction
-from game.player.player_action_type import PlayerActionType
-from game.player.player import Player
-from game.user import User
-from game.user_interface.game_ui import GameUI
+from src.game.player.player_action import PlayerAction
+from src.game.player.player_action_type import PlayerActionType
+from src.game.player.player import Player
+from src.user.user import User
+from src.game.user_interface.game_ui import GameUI
 
 class HumanPlayer(Player):
     
