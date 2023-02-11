@@ -112,7 +112,7 @@ with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
                 
                 new_table_users.append(user)
             except InvalidMoneyForSettingsException as e:
-                print(f"Player: {user.name} has been eliminated from the tournament!!!\n")
+                print(f"\nPlayer: {user.name} has been eliminated from the tournament!!!\n")
 
         table_1.users = new_table_users
 
