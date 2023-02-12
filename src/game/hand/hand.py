@@ -22,10 +22,26 @@ class Hand:
 
     @staticmethod
     def compare_kickers(first: List[Rank], second: List[Rank]) -> int:
+        #Check for if the ace is a low-ace instead of a high ace
+        #This is only possible when the straight is Ace->Two->Three->Four->Five
+
+        low_ace_first = len(first) == 5 and second[0] == Rank.ACE and first[1] == Rank.TWO
+        low_ace_second = len(second) == 5 and second[0] == Rank.ACE and second[1] == Rank.TWO
+
         for i in range(len(first) - 1, -1, -1):
             first_rank: Rank = first[i]
             second_rank: Rank = second[i]
-            diff: int = first_rank.strength - second_rank.strength
+
+            first_strength = first_rank.strength
+            second_strength = second_rank.strength
+
+            if low_ace_first and first_rank == Rank.ACE:
+                first_strength = 1
+
+            if low_ace_second and second_rank == Rank.ACE:
+                second_strength = 1
+
+            diff: int = first_strength - second_strength
 
             if diff !=0:
                 return diff
@@ -132,8 +148,9 @@ class Hand:
 
                 is_straight = self.__ranks_are_straight(ranks)
 
-                ranks.append(Rank.ACE)
-                ranks.pop(0)
+                if not is_straight:
+                    ranks.append(Rank.ACE)
+                    ranks.pop(0)
         else:
             for rank in ranks:
                 if rank not in ranks_counts.keys():
@@ -224,6 +241,15 @@ class Hand:
             self.kickers_ranks = ranks
 
     def __ranks_are_straight(self, ranks: List[Rank]):
+        #Check if this is an Ace-low straight
+        if (ranks[0] == Rank.ACE and 
+            ranks[1] == Rank.TWO and 
+            ranks[2] == Rank.THREE and 
+            ranks[3] == Rank.FOUR and 
+            ranks[4] == Rank.FIVE):
+
+            return True        
+
         for i in range(1, 5):
             if ranks[i - 1].strength + 1 != ranks[i].strength:
                 return False

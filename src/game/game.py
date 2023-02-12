@@ -44,9 +44,13 @@ class Game:
 
         if self.settings.small_blind_enabled:
             print(GameUI.small_blind_player_info_prompt(self))
+            
+            if not self.settings.big_blind_enabled:
+                print()
         
         if self.settings.big_blind_enabled:
             print(GameUI.big_blind_player_info_prompt(self))
+            print()
 
         print(GameUI.players_list_info_prompt(self))
         

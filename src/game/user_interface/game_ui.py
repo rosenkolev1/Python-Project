@@ -39,7 +39,7 @@ class GameUI:
 
     @staticmethod
     def big_blind_player_info_prompt(game: Game) -> str:
-        return f"The big blind player is: {game.big_blind_player.user.name}\n"
+        return f"The big blind player is: {game.big_blind_player.user.name}"
 
     @staticmethod
     def players_list_info_prompt(game: Game) -> str:

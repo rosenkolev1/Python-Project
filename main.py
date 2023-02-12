@@ -61,10 +61,10 @@ bot_player_6.predefine_choose_action(ChooseActionFactory.create_choose_action_al
 ))
 
 game_settings = (GameSetting()
-            .enable_big_blind(50, 1)
-            .enable_small_blind(25, 0)
+            # .enable_big_blind(50, 2)
+            # .enable_small_blind(25, 1)
             # .enable_ante(10)
-            .set_dealer(-1)
+            .set_dealer(0)
             .set_hand_visibility(HandVisibilitySetting.ALL)
             # .set_deck(Deck())
             )
@@ -90,6 +90,7 @@ table_1.add_user(user_6)
 
 #Redirect output to a file for fun
 with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
+
     #Create a table and play games until there is a single winner left
     print("The tournament begins!\n\n")
 
@@ -121,13 +122,15 @@ with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
             print(f"The winner of the tournament is {table_1.users[0].name}!!! 0_0")
             break
 
-        table_1.rotate_button()
+        if has_rotated_button:
+            table_1.rotate_button()
 
+        # This is only possible if the tournament begins with 2 players only
         if table_1.current_game.is_two_player_game and not has_rotated_button:
             table_1.game_settings.set_small_blind_holder(0)
             table_1.game_settings.set_big_blind_holder(1)
 
-        #Handle anomalies with the dealer, small_blind and big_blind holders when the game consists of only 2 players
+        # Handle anomalies with the dealer, small_blind and big_blind holders when the game consists of only 2 players
         if table_1.current_game.is_two_player_game:
             if table_1.game_settings.dealer_index == table_1.game_settings.big_blind_holder:
                 table_1.next_big_blind_holder()
@@ -143,8 +146,14 @@ with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
             has_rotated_button = True
 
         if len(table_1.game_history) % 5 == 0:
-            game_settings.big_blind_bet += 5
-            game_settings.small_blind_bet = game_settings.big_blind_bet / 2
+            if game_settings.big_blind_enabled:
+                game_settings.big_blind_bet += 5
+
+                if game_settings.small_blind_enabled:
+                    game_settings.small_blind_bet = game_settings.big_blind_bet / 2
+
+            elif game_settings.small_blind_enabled:
+                game_settings.small_blind_bet += 2.5
 
             print(f"\nBig blind increased to: {game_settings.big_blind_bet}")
             print(f"Small blind increased to: {game_settings.small_blind_bet}\n")

@@ -23,11 +23,18 @@ class Table:
 
     def rotate_button(self) -> Game:
         self.next_dealer()
-        self.next_small_blind_holder()
-        self.next_big_blind_holder()
+
+        if self.game_settings.small_blind_enabled:
+            self.next_small_blind_holder()
+
+        if self.game_settings.big_blind_enabled:
+            self.next_big_blind_holder()
 
     def __index_diff(self, index_1: int, index_2: int) -> int:
         dif: int = 0
+
+        if index_1 is None or index_2 is None:
+            return 0
 
         while index_1 != index_2:
             index_1 = self.__next_index(index_1)
