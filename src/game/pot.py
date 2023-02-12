@@ -36,10 +36,6 @@ class Pot:
             bet_opens_pot: bool = (player_stake > self.current_highest_stake + bet_min_amount_to_open and
                                    amount >= bet_min_amount_to_open)
 
-            # stake_diff: float = round(self.current_highest_stake - player_stake, 2)
-
-            # bet_opens_pot: bool = amount >= bet_min_amount_to_open
-
             if bet_opens_pot:
                 # This check is so that the highest bet amount is calculated properly at the start of a new round after the first bet
                 if self.player_who_opened_pot is None:
@@ -56,9 +52,6 @@ class Pot:
 
         self.total_money = round(self.total_money + amount, 2)
         player.user.money = round(player.user.money - amount, 2)
-        
-        # if self.highest_bet_amount < amount:
-        #     self.highest_bet_amount = amount
 
     def bet_is_matched_all(self) -> bool:
         for player in self.players:

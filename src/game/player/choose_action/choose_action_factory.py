@@ -36,6 +36,17 @@ class ChooseActionFactory:
 
         return fake_receive_input
 
+    """
+        Creates a 'choose_action' with the list of given predetermined moves. 
+        If one of these moves is illegal or otherwise fails the error handling checks, it will cause an infinite loop, so be wary. 
+        
+        If there are more moves than necessary given to the player, then these moves are ignored and the game continues as normal.
+        (For example, specifying a fold action and then something else afterwards, obviously you cannot play after folding)
+        
+        If there are less moves than necessary, i.e. the player runs out of predetermined moves, then the default 'choose_action'
+        method functionality is restored and any subsequent calls to it will trigger the player to have to enter the command manually
+        from the console. This is useful if you want to partially simulate the player's actions up to a point 
+    """
     @staticmethod
     def create_choose_action_predetermined_human_player(actions: List[(PlayerAction)]):
         action_index = 0
@@ -65,6 +76,15 @@ class ChooseActionFactory:
         
         return mock_choose_action
 
+    
+    """
+        Creates a 'choose_action' which will randomly select moves, with the exception of the specified excluded actions.
+        If there are no legal actions for the player to make, then it will try to play the provided default action!
+        If that action is also illegal, then this will cause an infinite loop.
+        
+        The All-In action can be forced if the raise action is legal and the amount to raise is >= user's money, regardless of
+        whether or not it is in the excluded actions list! 
+    """
     @staticmethod
     def create_choose_action_always_random_human_player(excluding_actions: List[PlayerActionType] = [], 
                                            back_up_action: PlayerActionType = PlayerActionType.FOLD) -> PlayerActionType:
@@ -89,14 +109,15 @@ class ChooseActionFactory:
                 amount = action_info.call_amount
             elif action_type == PlayerActionType.ALL_IN:
                 amount = self.user.money
-            #Force an all-in if the action is a raise and the amount is equal to all the remaining money of the user
+            # Force an all-in if the action is a raise and the amount is equal to all the remaining money of the user
+            # Regardless of whether or not the All-In is an excluded action 
             elif action_type == PlayerActionType.RAISE and amount == self.user.money:
                 return PlayerAction(PlayerActionType.ALL_IN, amount)
 
             action = PlayerAction(action_type, amount)
             action_string = ChooseActionFactory.__create_action_command_string_human_player(action)
 
-            #Replace the receive_input function so that it gives us the appropriate preset input
+            # Replace the receive_input function so that it gives us the appropriate preset input
             self.receive_input = ChooseActionFactory.__create_default_fake_receive_input_human_player(
                 self, possible_actions, action_info,
                 action_string
@@ -106,6 +127,15 @@ class ChooseActionFactory:
 
         return mock_choose_action
 
+    """
+        Creates a 'choose_action' with the list of given predetermined moves. 
+        If one of these moves is illegal or otherwise fails the error handling checks, it will cause an infinite loop, so be wary. 
+        
+        If there are more moves than necessary given to the player, then these moves are ignored and the game continues as normal.
+        (For example, specifying a fold action and then something else afterwards, obviously you cannot play after folding)
+        
+        If there are less moves than necessary, i.e. the player runs out of predetermined moves, then an error will occur! 
+    """
     @staticmethod
     def create_choose_action_predetermined(actions: List[(PlayerAction)]):
         action_index = 0
@@ -128,6 +158,14 @@ class ChooseActionFactory:
         
         return mock_choose_action
 
+    """
+        Creates a 'choose_action' which will randomly select moves, with the exception of the specified excluded actions.
+        If there are no legal actions for the player to make, then it will try to play the provided default action!
+        If that action is also illegal, then this will cause an infinite loop.
+        
+        The All-In action can be forced if the raise action is legal and the amount to raise is >= user's money, regardless of
+        whether or not it is in the excluded actions list! 
+    """
     @staticmethod
     def create_choose_action_always_random(excluding_actions: List[PlayerActionType] = [], 
                                            back_up_action: PlayerActionType = PlayerActionType.FOLD) -> PlayerActionType:
@@ -156,13 +194,19 @@ class ChooseActionFactory:
             elif action_type == PlayerActionType.RAISE and amount == self.user.money:
                 return PlayerAction(PlayerActionType.ALL_IN, amount)
 
-            # if action_type == PlayerActionType.RAISE or action_type == PlayerActionType.BET:
-
-
             return PlayerAction(action_type, amount)
 
         return mock_choose_action
 
+
+    """
+        Creates a 'choose_action' which will try to raise a random amount at all times.
+        If raising is not possible, but betting is, then it will bet instead.
+        If raising and betting is not possible, it will call instead.
+        If raising, betting or calling is not possible, it will go all-in instead.
+        
+        If it tries raising an amount >= the users' money, then it will go all-in instead.
+    """
     @staticmethod
     def create_choose_action_always_raise_if_possible() -> PlayerActionType:
         

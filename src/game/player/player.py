@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Tuple
 
 from src.game.deck.card import Card
+from src.game.hand.hand import Hand
 from src.game.player.choose_action.choose_action_info import ChooseActionInfo
 from src.game.player.player_action.player_action import PlayerAction
 from src.game.player.player_action.player_action_type import PlayerActionType
@@ -22,7 +23,7 @@ class Player(ABC):
         self.has_folded = False
         self.has_played_turn = False
         self.cards: List[Card] = []
-        self.best_hand: Card = None 
+        self.best_hand: Hand = None 
 
     @property
     def is_all_in(self) -> bool:
@@ -37,6 +38,9 @@ class Player(ABC):
 
     def _enough_money_for_min_bet_or_raise(self, settings: GameSetting, minimum_bet_money_required: float) -> bool:
         return not settings.bet_minimum_enabled or self.user.money >= minimum_bet_money_required
+
+    def predefine_choose_action(self, new_choose_action):
+        pass
 
     def get_possible_actions(self, pot: Pot, game: Game) -> Tuple[List[PlayerActionType], ChooseActionInfo]:
         #Determine the possible actions
@@ -63,12 +67,6 @@ class Player(ABC):
 
                 can_raise_regardless_of_minimum: bool = (not calling_is_all_in
                             and any(map(lambda x: x != self and not x.is_all_in, pot.get_players_not_folded())))
-
-                # can_raise: bool = (
-                #     can_raise_regardless_of_minimum and 
-                #     self.user.money >= minimum_raise_money_needed and
-                #     pot.player_who_opened_pot != self
-                # )
 
                 can_raise: bool = (
                     can_raise_regardless_of_minimum and 

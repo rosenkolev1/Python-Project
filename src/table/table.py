@@ -17,8 +17,8 @@ class Table:
         self.current_game = Game(self.game_settings)
         self.current_game.table = self
 
-    def start_game(self):
-        self.current_game.start_game()
+    def start_game(self, initial_pot_money: float = 0):
+        self.current_game.start_game(initial_pot_money)
         self.game_history.append(self.current_game)
 
     def rotate_button(self) -> Game:

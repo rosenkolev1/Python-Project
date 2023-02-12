@@ -18,8 +18,8 @@ from src.game.user_interface.game_ui import GameUI
 
 class Game:
 
-    def __init__(self, game_setting: GameSetting) -> None:
-        self.settings: GameSetting = game_setting
+    def __init__(self, game_settings: GameSetting) -> None:
+        self.settings: GameSetting = game_settings
         
         self.turn: int = 0
 
@@ -33,7 +33,7 @@ class Game:
 
         self.table = None
 
-    def start_game(self):
+    def start_game(self, initial_pot_money: float = 0):
         print(GameUI.GAME_STARTING_INFO_PROMPT)
 
         self.round = GameRound.Pre_Flop
@@ -55,6 +55,8 @@ class Game:
         print(GameUI.players_list_info_prompt(self))
         
         main_pot: Pot = Pot()
+        
+        main_pot.total_money = round(main_pot.total_money + initial_pot_money, 2)
 
         if self.settings.ante_enabled:
             for player in self.players:

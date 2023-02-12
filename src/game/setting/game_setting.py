@@ -3,14 +3,39 @@ from src.game.deck.deck import Deck
 from src.game.setting.hand_visibility_setting import HandVisibilitySetting
 from src.game.setting.invalid_money_for_settings_exception import InvalidMoneyForSettingsException
 
-
+"""
+    The GameSetting class contains variables which determine various settings for the game:
+        - deck - The Deck with which the game will be played
+        
+        - dealer_index - The index of the player who holds the so-called 'dealer button', i.e. the dealer. 
+            In casinos, he doesn't actually deal the cards, but the 'dealer button' is still used.  
+            The rounds typically start from the first player after the dealer, except for the Pre-Flop round
+            (but only if there are small or big blinds)
+        
+        - small_blind_enabled - Determines whether or not there will be a small blind in the game
+        - small_blind_bet - The amount of the small blind bet.
+        - small_blind_holder - The index of the player who will have to pay the small blind in the game. 
+            Typically that is the person right after the dealer!
+            
+        - big_blind_enabled - Determines whether or not there will be a big blind in the game
+        - big_blind_bet - The amount of the big blind bet.
+        - big_blind_holder - The index of the player who will have to pay the big blind in the game. 
+            Typically that is the person right after the one who has to pay the small blind!
+        
+        - ante_enabled - Determines whether or not there will be antes in the game
+        - ante_bet - The amount of the ante bet.
+        
+        - bet_maximum_enabled - Determines whether or not there will be a minimum amount by which to bet or raise
+            Enabling this makes the game a typical No Limit game. Read https://en.wikipedia.org/wiki/Betting_in_poker#No_limit for info.
+        - bet_minimum_amount - The min amount of the opening bet.
+        
+        - hand_visibility_setting - Determines which players' 2 card hand will be shown in the console upon being dealt.
+            Check the 'hand_visibility_setting.py' module for more info!
+"""
 class GameSetting:
 
     def __init__(self) -> None:
         self.deck: Deck = None
-
-        # self.override_turn_enabled = False
-        # self.turn: int = 0
 
         self.dealer_index: int = 0
 
@@ -28,6 +53,7 @@ class GameSetting:
         self.bet_minimum_enabled: bool = False
         self.bet_minimum_amount: float = None
 
+        # These do not work because I have not implemented them
         self.bet_maximum_enabled: bool = False
         self.bet_maximum_amount: float = None
 
