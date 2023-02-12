@@ -1,4 +1,4 @@
-To run the app, you are going to have to create a virtual environment and download all the necessary requirement from the requirement.txt
+## To run the app, you are going to have to create a virtual environment and download all the necessary requirement from the requirement.txt
 
 I followed the steps at bottom of https://github.com/fmipython/PythonCourse2022/blob/main/13%20-%20Modules/13%20-%20Modules.ipynb
 For setting up the VENV.
