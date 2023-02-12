@@ -1,10 +1,10 @@
 import random
 from typing import List
-from src.game.player.choose_action_info import ChooseActionInfo
+from src.game.player.choose_action.choose_action_info import ChooseActionInfo
 from src.game.player.human_player import HumanPlayer
 
-from src.game.player.player_action import PlayerAction
-from src.game.player.player_action_type import PlayerActionType
+from src.game.player.player_action.player_action import PlayerAction
+from src.game.player.player_action.player_action_type import PlayerActionType
 from src.game.player.player import Player
 from src.game.pot import Pot
 from src.game.setting.game_setting import GameSetting

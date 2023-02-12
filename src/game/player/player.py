@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, List, Tuple
 
 from src.game.deck.card import Card
-from src.game.player.choose_action_info import ChooseActionInfo
-from src.game.player.player_action import PlayerAction
-from src.game.player.player_action_type import PlayerActionType
+from src.game.player.choose_action.choose_action_info import ChooseActionInfo
+from src.game.player.player_action.player_action import PlayerAction
+from src.game.player.player_action.player_action_type import PlayerActionType
 from src.game.setting.game_setting import GameSetting
 from src.user.user import User
 

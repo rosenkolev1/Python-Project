@@ -5,9 +5,9 @@ from src.game.deck.preset_deck import PresetDeck
 from src.game.game import Game
 from src.game.hand.hand import Hand
 from src.game.player.bot_player import BotPlayer
-from src.game.player.choose_action_factory import ChooseActionFactory
-from src.game.player.player_action import PlayerAction
-from src.game.player.player_action_type import PlayerActionType
+from src.game.player.choose_action.choose_action_factory import ChooseActionFactory
+from src.game.player.player_action.player_action import PlayerAction
+from src.game.player.player_action.player_action_type import PlayerActionType
 from src.game.setting.game_setting import GameSetting
 from src.game.setting.hand_visibility_setting import HandVisibilitySetting
 from src.user.user import User

@@ -5,8 +5,8 @@ from src.game.deck.card import Card
 from src.game.hand.hand import Hand
 from src.game.player.bot_player import BotPlayer
 from src.game.player.human_player import HumanPlayer
-from src.game.player.player_action import PlayerAction
-from src.game.player.player_action_type import PlayerActionType
+from src.game.player.player_action.player_action import PlayerAction
+from src.game.player.player_action.player_action_type import PlayerActionType
 
 from src.game.player.player import Player
 from src.game.deck.deck import Deck
