@@ -107,11 +107,20 @@ with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
             user = table_1.users[i]
 
             try:
-                bot_player = BotPlayer(user, ChooseActionFactory.create_choose_action_always_random(
+                # bot_player = BotPlayer(user, ChooseActionFactory.create_choose_action_always_random(
+                #             [PlayerActionType.ALL_IN], PlayerActionType.ALL_IN
+                #         ))
+
+                # table_1.current_game.add_player(bot_player)  
+
+                human_player = HumanPlayer(user)
+
+                human_player.predefine_choose_action(ChooseActionFactory.create_choose_action_always_random_human_player(
                             [PlayerActionType.ALL_IN], PlayerActionType.ALL_IN
                         ))
 
-                table_1.current_game.add_player(bot_player)  
+                table_1.current_game.add_player(human_player)  
+
             except InvalidMoneyForSettingsException as e:
                 removed_table_users.append(user)
                 print(f"\nPlayer: {user.name} has been eliminated from the tournament!!!\n")

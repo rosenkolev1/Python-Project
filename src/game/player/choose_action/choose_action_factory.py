@@ -13,41 +13,97 @@ from src.game.user_interface.game_ui import GameUI
 class ChooseActionFactory:
 
     @staticmethod
+    def __create_action_command_string_human_player(action: PlayerAction) -> str:            
+        predetermined_action_command_string = (
+            {v: k for k, v in GameUI.PLAYER_COMMAND_ACTION_MAP.items()}[action.type]
+        )
+
+        predetermined_action_amount_string = str(action.amount) 
+
+        predetermined_action_string = predetermined_action_command_string + " " + predetermined_action_amount_string
+
+        return predetermined_action_string
+
+    @staticmethod
+    def __create_default_fake_receive_input_human_player(self: HumanPlayer, 
+            possible_actions: List[PlayerActionType], 
+            action_info: ChooseActionInfo,
+            action_string: str) -> str:
+
+        def fake_receive_input(*args, **kwargs) -> str:
+                print(GameUI.choose_actions_command_prompt(self, possible_actions, action_info))
+                return action_string
+
+        return fake_receive_input
+
+    @staticmethod
     def create_choose_action_predetermined_human_player(actions: List[(PlayerAction)]):
         action_index = 0
             
-        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo,
-                               original_choose_action, original_receive_input):
+        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo):
             nonlocal action_index     
 
             #If we have run out of predetermined moves, then give back control to the user
             if action_index >= len(actions):
-                self.receive_input = original_receive_input
+                self.receive_input = self.original_receive_input
 
-                return original_choose_action(possible_actions, action_info)
+                return self.original_choose_action(possible_actions, action_info)
 
             predetermined_action = actions[action_index]
-            
-            predetermined_action_command_string = (
-                {v: k for k, v in GameUI.PLAYER_COMMAND_ACTION_MAP.items()}[predetermined_action.type]
-            )
-
-            predetermined_action_amount_string = str(predetermined_action.amount) 
-
-            predetermined_action_string = predetermined_action_command_string + " " + predetermined_action_amount_string
+            predetermined_action_string = ChooseActionFactory.__create_action_command_string_human_player(predetermined_action)
 
             action_index += 1
 
-            def fake_receive_input(*args, **kwargs) -> str:
-                print(GameUI.choose_actions_command_prompt(self, possible_actions, action_info))
-                return predetermined_action_string
-
             #Replace the receive_input function so that it gives us the appropriate preset input
-            self.receive_input = fake_receive_input
+            self.receive_input = ChooseActionFactory.__create_default_fake_receive_input_human_player(
+                self, possible_actions, action_info,
+                predetermined_action_string
+            )
 
             #Call the original choose_action function which now has the fake_receive_input
-            return original_choose_action(possible_actions, action_info)
+            return self.original_choose_action(possible_actions, action_info)
         
+        return mock_choose_action
+
+    @staticmethod
+    def create_choose_action_always_random_human_player(excluding_actions: List[PlayerActionType] = [], 
+                                           back_up_action: PlayerActionType = PlayerActionType.FOLD) -> PlayerActionType:
+        
+        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo):
+            #Filter available actions
+            possible_actions_filtered: List[PlayerActionType] = list(filter(lambda x: x not in excluding_actions, possible_actions))
+
+            #Choose randomly
+            action_type: PlayerActionType = None
+
+            if len(possible_actions_filtered) == 0:
+                action_type = back_up_action
+            else:
+                action_type = possible_actions_filtered[random.randint(0, len(possible_actions_filtered) - 1)] 
+
+            min_bet_amount: float = action_info.pot.highest_bet_amount if action_info.game.settings.bet_minimum_enabled else 1
+
+            amount: float = min(action_info.call_amount + (round(random.random() % 50 + min_bet_amount, 2)), self.user.money)
+
+            if action_type == PlayerActionType.CALL:
+                amount = action_info.call_amount
+            elif action_type == PlayerActionType.ALL_IN:
+                amount = self.user.money
+            #Force an all-in if the action is a raise and the amount is equal to all the remaining money of the user
+            elif action_type == PlayerActionType.RAISE and amount == self.user.money:
+                return PlayerAction(PlayerActionType.ALL_IN, amount)
+
+            action = PlayerAction(action_type, amount)
+            action_string = ChooseActionFactory.__create_action_command_string_human_player(action)
+
+            #Replace the receive_input function so that it gives us the appropriate preset input
+            self.receive_input = ChooseActionFactory.__create_default_fake_receive_input_human_player(
+                self, possible_actions, action_info,
+                action_string
+            )
+
+            return self.original_choose_action(possible_actions, action_info)
+
         return mock_choose_action
 
     @staticmethod

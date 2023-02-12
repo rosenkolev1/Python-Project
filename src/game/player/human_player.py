@@ -13,8 +13,8 @@ class HumanPlayer(Player):
     def __init__(self, user: User) -> None:
         super().__init__(user)
 
-        self.__original_choose_action = self.choose_action
-        self.__original_receive_input = self.receive_input
+        self.original_choose_action = self.choose_action
+        self.original_receive_input = self.receive_input
 
     def receive_input(self, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo) -> str:
         return input(GameUI.choose_actions_command_prompt(self, possible_actions, action_info))
@@ -38,12 +38,11 @@ class HumanPlayer(Player):
         return amount > 0
 
     def restore_original_choose_action(self):
-        self.choose_action = self.__original_choose_action
-        self.receive_input = self.__original_receive_input
+        self.choose_action = self.original_choose_action
+        self.receive_input = self.original_receive_input
 
     def predefine_choose_action(self, new_choose_action):
-        self.choose_action = lambda possible_actions, action_info: new_choose_action(
-            self, possible_actions, action_info, self.__original_choose_action, self.__original_receive_input)
+        self.choose_action = lambda possible_actions, action_info: new_choose_action(self, possible_actions, action_info)
             
     def choose_action(self, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo) -> PlayerAction:
         while True:
