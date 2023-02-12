@@ -37,7 +37,7 @@ from src.game.player.choose_action.choose_action_factory import ChooseActionFact
 """
 
 """
-    The user contains a name and money
+    The User class contains a name and money
 """
 user_1 = User("Roskata", 1000)
 user_2 = User("Stefan", 1000)
@@ -523,7 +523,7 @@ total_money: float = round(
 assert total_money == 6_000
 
 """
-    Feel free to check out the test modules for other example of how to create games, players, decks, etc...
+    Feel free to check out the test modules for other examples of how to create games, players, decks, etc...
     
     The unit tests are not exhaustive because I did not have time to make them exhaustive. 
     Also, doing exhaustive tests for all cases in poker tough.
