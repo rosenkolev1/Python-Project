@@ -1,10 +1,13 @@
 import random
 from typing import List
+from src.game.player.choose_action_info import ChooseActionInfo
 from src.game.player.human_player import HumanPlayer
 
 from src.game.player.player_action import PlayerAction
 from src.game.player.player_action_type import PlayerActionType
 from src.game.player.player import Player
+from src.game.pot import Pot
+from src.game.setting.game_setting import GameSetting
 from src.game.user_interface.game_ui import GameUI
 
 class ChooseActionFactory:
@@ -13,7 +16,7 @@ class ChooseActionFactory:
     def create_choose_action_predetermined_human_player(actions: List[(PlayerAction)]):
         action_index = 0
             
-        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], call_amount: float,
+        def mock_choose_action(self: HumanPlayer, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo,
                                original_choose_action, original_receive_input):
             nonlocal action_index     
 
@@ -21,7 +24,7 @@ class ChooseActionFactory:
             if action_index >= len(actions):
                 self.receive_input = original_receive_input
 
-                return original_choose_action(possible_actions, call_amount)
+                return original_choose_action(possible_actions, action_info)
 
             predetermined_action = actions[action_index]
             
@@ -36,14 +39,14 @@ class ChooseActionFactory:
             action_index += 1
 
             def fake_receive_input(*args, **kwargs) -> str:
-                print(GameUI.choose_actions_command_prompt(self, possible_actions, call_amount))
+                print(GameUI.choose_actions_command_prompt(self, possible_actions, action_info))
                 return predetermined_action_string
 
             #Replace the receive_input function so that it gives us the appropriate preset input
             self.receive_input = fake_receive_input
 
             #Call the original choose_action function which now has the fake_receive_input
-            return original_choose_action(possible_actions, call_amount)
+            return original_choose_action(possible_actions, action_info)
         
         return mock_choose_action
 
@@ -51,17 +54,17 @@ class ChooseActionFactory:
     def create_choose_action_predetermined(actions: List[(PlayerAction)]):
         action_index = 0
             
-        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], call_amount: float):
+        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo):
             nonlocal action_index     
             predetermined_action = actions[action_index]
             
             amount: float = predetermined_action.amount
 
             if predetermined_action.type == PlayerActionType.RAISE:
-                amount += call_amount
+                amount += action_info.call_amount
 
             if predetermined_action.type == PlayerActionType.CALL:
-                amount = call_amount
+                amount = action_info.call_amount
 
             action_index += 1
             
@@ -73,7 +76,7 @@ class ChooseActionFactory:
     def create_choose_action_always_random(excluding_actions: List[PlayerActionType] = [], 
                                            back_up_action: PlayerActionType = PlayerActionType.FOLD) -> PlayerActionType:
         
-        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], call_amount: float):
+        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo):
             #Filter available actions
             possible_actions_filtered: List[PlayerActionType] = list(filter(lambda x: x not in excluding_actions, possible_actions))
 
@@ -85,15 +88,20 @@ class ChooseActionFactory:
             else:
                 action_type = possible_actions_filtered[random.randint(0, len(possible_actions_filtered) - 1)] 
 
-            amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+            min_bet_amount = action_info.pot.highest_bet_amount if action_info.game.settings.bet_minimum_enabled else 1
+
+            amount: float = min(action_info.call_amount + random.randint(min_bet_amount, 50), self.user.money)
 
             if action_type == PlayerActionType.CALL:
-                amount = call_amount
+                amount = action_info.call_amount
             elif action_type == PlayerActionType.ALL_IN:
                 amount = self.user.money
-            #Force and all-in if the action is a raise and the amount is equal to all the remaining money of the user
+            #Force an all-in if the action is a raise and the amount is equal to all the remaining money of the user
             elif action_type == PlayerActionType.RAISE and amount == self.user.money:
                 return PlayerAction(PlayerActionType.ALL_IN, amount)
+
+            # if action_type == PlayerActionType.RAISE or action_type == PlayerActionType.BET:
+
 
             return PlayerAction(action_type, amount)
 
@@ -102,7 +110,7 @@ class ChooseActionFactory:
     @staticmethod
     def create_choose_action_always_raise_if_possible() -> PlayerActionType:
         
-        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], call_amount: float):
+        def mock_choose_action(self: Player, possible_actions: List[PlayerActionType], action_info: ChooseActionInfo):
             action_type: PlayerActionType = None
             
             if PlayerActionType.RAISE in possible_actions:        
@@ -115,11 +123,13 @@ class ChooseActionFactory:
                 action_type = PlayerActionType.ALL_IN
 
             if action_type == PlayerActionType.CALL:
-                return PlayerAction(action_type, call_amount)
+                return PlayerAction(action_type, action_info.call_amount)
             elif action_type == PlayerActionType.ALL_IN:
                 return PlayerAction(action_type, self.user.money)
     
-            amount: float = min(call_amount + random.randint(1, 50), self.user.money)
+            min_bet_amount = action_info.pot.highest_bet_amount if action_info.game.settings.bet_minimum_enabled else 1
+
+            amount: float = min(action_info.call_amount + random.randint(min_bet_amount, 50), self.user.money)
 
             if amount == self.user.money:
                 action_type = PlayerActionType.ALL_IN

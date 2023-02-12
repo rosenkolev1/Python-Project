@@ -8,6 +8,7 @@ class Pot:
         self.total_money: float = 0
 
         self.current_highest_stake = 0
+        self.highest_bet_amount = 0
 
     def get_stake_for_player(self, player: Player):
         if player not in self.players:
@@ -24,10 +25,21 @@ class Pot:
         player_stake = self.get_stake_for_player(player)
 
         if player_stake > self.current_highest_stake:
+
+            # This check so that the highest bet amount is calculated properly at the start of a new round after the first bet
+            if self.current_highest_stake == 0:
+                self.highest_bet_amount = amount
+
+            else:
+                self.highest_bet_amount = player_stake - self.current_highest_stake
+
             self.current_highest_stake = player_stake
 
         self.total_money += amount
         player.user.money -= amount
+        
+        # if self.highest_bet_amount < amount:
+        #     self.highest_bet_amount = amount
 
     def bet_is_matched_all(self) -> bool:
         for player in self.players:

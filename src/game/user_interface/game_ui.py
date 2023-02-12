@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List
+from src.game.player.choose_action_info import ChooseActionInfo
 
 from src.game.player.player import Player
 from src.game.player.player_action import PlayerAction
@@ -23,11 +24,23 @@ class GameUI:
 
     INVALID_COMMAND_MISSING_AMOUNT_ARGUMENT = "\nThe given command is invalid because you have not specified an amount!\n"
 
+    INVALID_BET_AMOUNT_IS_NEGATIVE_OR_ZERO = "\nInvalid action! Cannot bet or raise 0$ or less!\n"
+
+    INVALID_RAISE_AMOUNT_BELOW_MINIMUM = "\nInvalid raise. You cannot raise less than the minimum required!\n"
+
     GAME_STARTING_INFO_PROMPT = "Game is starting...\n"
 
     GAME_ENDING_INFO_PROMPT = "Game has ended...\n\n"
 
     SHOWDOWN_STARTING_INFO_PROMPT = f"Showdown is starting...\n"
+
+    @staticmethod
+    def invalid_raise_amount_below_minimum(amount: float):
+        return f"Invalid raise. You cannot raise less than the minimum required! The minimum raise is: {amount}$\n"
+
+    @staticmethod
+    def invalid_bet_amount_below_minimum(amount: float):
+        return f"Invalid bet. You cannot bet less than the minimum required! The minimum bet is: {amount}$\n"
 
     @staticmethod
     def dealer_info_prompt(game: Game) -> str:
@@ -138,29 +151,35 @@ class GameUI:
         return f"{game.round} is over...\n{'-'.join(['']*100)}\n"
 
     @staticmethod
-    def action_command_prompt(player: Player, action: PlayerActionType, call_amount: float):
+    def action_command_prompt(player: Player, action: PlayerActionType, action_info: ChooseActionInfo):
         if action == PlayerActionType.FOLD:
             return "Fold"
         elif action == PlayerActionType.CHECK:
             return "Check"
         elif action == PlayerActionType.RAISE:
-            return "Raise <amount-raise>"
+            if action_info.game.settings.bet_minimum_enabled:
+                return f"Raise <amount-to-raise-by({action_info.pot.highest_bet_amount}$ or more)>"
+
+            return "Raise <amount-to-raise-by>"
         elif action == PlayerActionType.BET:
-            return"Bet <amount-bet>"
+            if action_info.game.settings.bet_minimum_enabled:
+                return f"Bet <amount-to-bet({action_info.pot.highest_bet_amount}$ or more)>"
+
+            return"Bet <amount-to-bet>"
         elif action == PlayerActionType.ALL_IN:
             return f"All-in {player.user.money}$"
         elif action == PlayerActionType.CALL:
-            return f"Call {call_amount}$"
+            return f"Call {action_info.call_amount}$"
             
         raise ValueError("Invalid action command!")
 
     @staticmethod
-    def choose_actions_command_prompt(player: Player, actions: List[PlayerActionType], call_amount: float) -> str:
+    def choose_actions_command_prompt(player: Player, actions: List[PlayerActionType], action_info: ChooseActionInfo) -> str:
         sorted_actions = sorted(actions, key=lambda x: x.value)
         action_strings: List[str] = []
 
         for action in sorted_actions:
-            action_str = GameUI.action_command_prompt(player, action, call_amount)
+            action_str = GameUI.action_command_prompt(player, action, action_info)
             action_strings.append(action_str)
 
         res = f"Player: {player.user.name}, it is your turn. Choose an action ({' | '.join(action_strings)}): "

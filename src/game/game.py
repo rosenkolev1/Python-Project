@@ -56,6 +56,9 @@ class Game:
         
         main_pot: Pot = Pot()
 
+        #Set the minimum bet for the pot at the initial minimum bet. If the small or big blinds are more than it, then overwrite it!
+        main_pot.highest_bet_amount = 0 if not self.settings.enable_minimum_bet else self.settings.bet_minimum_amount
+
         if self.settings.ante_enabled:
             for player in self.players:
                 main_pot.place_bet(player, self.settings.ante_bet)
@@ -302,8 +305,10 @@ class Game:
         print(GameUI.round_starting_info_prompt(self))
 
         #Set the current highest stake for the current pot for this round to 0 to reset it
+        #Also set the highest bet back down to 0
         if (self.round != GameRound.Pre_Flop):
             self.current_pot.current_highest_stake = 0
+            self.current_pot.highest_bet_amount = self.settings.bet_minimum_amount            
 
         #Reset the has_played_turn status for all the players who have not folded and are not all-in
         for player in self.current_pot.get_players_not_folded_and_not_all_in():
@@ -370,9 +375,9 @@ class Game:
         pot = self.current_pot
         
         #Determine the possible actions
-        possible_actions, call_amount = player.get_possible_actions(pot)
+        possible_actions, choose_action_info = player.get_possible_actions(pot, self)
 
-        action: PlayerAction = player.choose_action(possible_actions, call_amount)
+        action: PlayerAction = player.choose_action(possible_actions, choose_action_info)
 
         is_all_in: bool = action.type == PlayerActionType.ALL_IN
         is_all_in_and_raise: bool = is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake
@@ -391,7 +396,7 @@ class Game:
             #In this case, we are not all-in
             if not is_all_in:
                 if action.type == PlayerActionType.RAISE:
-                    print(GameUI.player_raising_info_prompt(player, action, call_amount))
+                    print(GameUI.player_raising_info_prompt(player, action, choose_action_info.call_amount))
                 else:
                     print(GameUI.player_bet_or_call_info_prompt(player, action))
             else:

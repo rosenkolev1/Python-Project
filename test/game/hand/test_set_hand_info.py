@@ -6,6 +6,27 @@ from src.game.deck.suit import Suit
 from src.game.hand.hand import Hand
 from src.game.hand.hand_combination import HandCombination
 
+def test_set_hand_info_straight():
+
+    hand: Hand = Hand(
+        [
+            Card(Rank.SEVEN, Suit.DIAMONDS),
+            Card(Rank.NINE, Suit.DIAMONDS),
+            Card(Rank.JACK, Suit.DIAMONDS),
+            Card(Rank.TEN, Suit.DIAMONDS),
+            Card(Rank.EIGHT, Suit.SPADES),
+        ]
+    )
+
+    assert hand.combination == HandCombination.STRAIGHT
+    assert hand.kickers_ranks == [
+        Rank.SEVEN,
+        Rank.EIGHT,
+        Rank.NINE,
+        Rank.TEN,
+        Rank.JACK
+    ]
+
 def test_set_hand_info_high_ace_straight():
 
     hand: Hand = Hand(
@@ -49,4 +70,4 @@ def test_set_hand_info_low_ace_straight():
     ]
 
 if __name__ == "__main__":
-    retcode = pytest.main()
+    retcode = pytest.main(["test/game/hand/test_set_hand_info.py"])
