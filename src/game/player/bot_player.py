@@ -29,9 +29,9 @@ class BotPlayer(Player):
             
             if not self.__bet_amount_is_positive(chosen_action.amount):
                 raise ValueError(f"Invalid bet or raise amount! The amount must be positive!")
-                
+
             elif self.__bet_amount_is_below_minimum(action_info, chosen_action.amount, action_info.pot.highest_bet_amount):
-                raise ValueError(f"Invalid bet or raise amount! The amount must be at least {action_info.pot.highest_bet_amount}")
+                raise ValueError(f"Invalid bet or raise amount! The amount must be at least {action_info.pot.highest_bet_amount}$")
 
         return chosen_action
             

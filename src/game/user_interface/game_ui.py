@@ -100,7 +100,7 @@ class GameUI:
 
     @staticmethod
     def player_raising_info_prompt(player: Player, action: PlayerAction, call_amount: float) -> str:
-        return f"Player: {player.user.name} is doing {action.type.name} by amount {action.amount - call_amount}$! Their current balance is {player.user.money}$\n"
+        return f"Player: {player.user.name} is doing {action.type.name} by amount {round(action.amount - call_amount, 2)}$! Their current balance is {player.user.money}$\n"
 
     @staticmethod
     def player_bet_or_call_info_prompt(player: Player, action: PlayerAction) -> str:

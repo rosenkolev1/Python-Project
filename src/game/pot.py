@@ -20,7 +20,7 @@ class Pot:
         if player not in self.players:
             self.players.append(player)
 
-        player.stake += amount  
+        player.stake = round(player.stake + amount, 2)  
 
         player_stake = self.get_stake_for_player(player)
 
@@ -31,12 +31,12 @@ class Pot:
                 self.highest_bet_amount = amount
 
             else:
-                self.highest_bet_amount = player_stake - self.current_highest_stake
+                self.highest_bet_amount = round(player_stake - self.current_highest_stake, 2)
 
             self.current_highest_stake = player_stake
 
-        self.total_money += amount
-        player.user.money -= amount
+        self.total_money = round(self.total_money + amount, 2)
+        player.user.money = round(player.user.money - amount, 2)
         
         # if self.highest_bet_amount < amount:
         #     self.highest_bet_amount = amount

@@ -61,100 +61,100 @@ bot_player_6.predefine_choose_action(ChooseActionFactory.create_choose_action_al
 ))
 
 game_settings = (GameSetting()
-            # .enable_big_blind(50, 2)
-            # .enable_small_blind(25, 1)
+            .enable_big_blind(50, 2)
+            .enable_small_blind(25, 1)
             # .enable_ante(10)
             .set_dealer(0)
-            .enable_minimum_bet(30)
+            .enable_minimum_bet(50)
             .set_hand_visibility(HandVisibilitySetting.ALL)
             .set_deck(Deck())
             )
 
-game_1 = Game(game_settings)
-game_1.add_player(human_player_1)
-game_1.add_player(human_player_2)
-game_1.add_player(human_player_3)
+# game_1 = Game(game_settings)
+# game_1.add_player(human_player_1)
+# game_1.add_player(human_player_2)
+# game_1.add_player(human_player_3)
 # game_1.add_player(human_player_4)
 # game_1.add_player(human_player_5)
 # game_1.add_player(human_player_6)
 
-game_1.start_game()
+# game_1.start_game()
 
-# table_1 = Table(game_settings)
+table_1 = Table(game_settings)
 
-# table_1.add_user(user_1)
-# table_1.add_user(user_2)
-# table_1.add_user(user_3)
-# table_1.add_user(user_4)
-# table_1.add_user(user_5)
-# table_1.add_user(user_6)
+table_1.add_user(user_1)
+table_1.add_user(user_2)
+table_1.add_user(user_3)
+table_1.add_user(user_4)
+table_1.add_user(user_5)
+table_1.add_user(user_6)
 
-# #Redirect output to a file for fun
-# with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
+#Redirect output to a file for fun
+with open('tournament_games.txt', mode='w', encoding="utf-8") as sys.stdout:
 
-#     #Create a table and play games until there is a single winner left
-#     print("The tournament begins!\n\n")
+    #Create a table and play games until there is a single winner left
+    print("The tournament begins!\n\n")
 
-#     has_rotated_button: bool = False
+    has_rotated_button: bool = False
 
-#     while True:
-#         game_settings.set_deck(Deck())
-#         table_1.new_game()
+    while True:
+        game_settings.set_deck(Deck())
+        table_1.new_game()
 
-#         removed_table_users = []
+        removed_table_users = []
 
-#         for i in range(0, len(table_1.users)):
-#             user = table_1.users[i]
+        for i in range(0, len(table_1.users)):
+            user = table_1.users[i]
 
-#             try:
-#                 bot_player = BotPlayer(user, ChooseActionFactory.create_choose_action_always_random(
-#                             [PlayerActionType.ALL_IN], PlayerActionType.ALL_IN
-#                         ))
+            try:
+                bot_player = BotPlayer(user, ChooseActionFactory.create_choose_action_always_random(
+                            [PlayerActionType.ALL_IN], PlayerActionType.ALL_IN
+                        ))
 
-#                 table_1.current_game.add_player(bot_player)  
-#             except InvalidMoneyForSettingsException as e:
-#                 removed_table_users.append(user)
-#                 print(f"\nPlayer: {user.name} has been eliminated from the tournament!!!\n")
+                table_1.current_game.add_player(bot_player)  
+            except InvalidMoneyForSettingsException as e:
+                removed_table_users.append(user)
+                print(f"\nPlayer: {user.name} has been eliminated from the tournament!!!\n")
 
-#         for user in removed_table_users:
-#             table_1.remove_user(user)
+        for user in removed_table_users:
+            table_1.remove_user(user)
 
-#         if len(table_1.users) == 1:
-#             print(f"The winner of the tournament is {table_1.users[0].name}!!! 0_0")
-#             break
+        if len(table_1.users) == 1:
+            print(f"The winner of the tournament is {table_1.users[0].name}!!! 0_0")
+            break
 
-#         if has_rotated_button:
-#             table_1.rotate_button()
+        if has_rotated_button:
+            table_1.rotate_button()
 
-#         # This is only possible if the tournament begins with 2 players only
-#         if table_1.current_game.is_two_player_game and not has_rotated_button:
-#             table_1.game_settings.set_small_blind_holder(0)
-#             table_1.game_settings.set_big_blind_holder(1)
+        # This is only possible if the tournament begins with 2 players only
+        if table_1.current_game.is_two_player_game and not has_rotated_button:
+            table_1.game_settings.set_small_blind_holder(0)
+            table_1.game_settings.set_big_blind_holder(1)
 
-#         # Handle anomalies with the dealer, small_blind and big_blind holders when the game consists of only 2 players
-#         if table_1.current_game.is_two_player_game:
-#             if table_1.game_settings.dealer_index == table_1.game_settings.big_blind_holder:
-#                 table_1.next_big_blind_holder()
+        # Handle anomalies with the dealer, small_blind and big_blind holders when the game consists of only 2 players
+        if table_1.current_game.is_two_player_game:
+            if table_1.game_settings.dealer_index == table_1.game_settings.big_blind_holder:
+                table_1.next_big_blind_holder()
 
-#             if table_1.game_settings.small_blind_holder == table_1.game_settings.big_blind_holder:
-#                 table_1.game_settings.set_small_blind_holder(table_1.game_settings.dealer_index)
+            if table_1.game_settings.small_blind_holder == table_1.game_settings.big_blind_holder:
+                table_1.game_settings.set_small_blind_holder(table_1.game_settings.dealer_index)
 
-#         print(f"{'*' * 100} Game #{len(table_1.game_history) + 1} {'*' * 100}")
-#         table_1.start_game()
-#         print(f"{'*' * 100} End of Game #{len(table_1.game_history)} {'*' * 100}")
+        print(f"{'*' * 100} Game #{len(table_1.game_history) + 1} {'*' * 100}")
+        table_1.start_game()
+        print(f"{'*' * 100} End of Game #{len(table_1.game_history)} {'*' * 100}")
 
-#         if not has_rotated_button:
-#             has_rotated_button = True
+        if not has_rotated_button:
+            has_rotated_button = True
 
-#         if len(table_1.game_history) % 5 == 0:
-#             if game_settings.big_blind_enabled:
-#                 game_settings.big_blind_bet += 5
+        if len(table_1.game_history) % 5 == 0:
+            if game_settings.big_blind_enabled:
+                game_settings.big_blind_bet += 5
 
-#                 if game_settings.small_blind_enabled:
-#                     game_settings.small_blind_bet = game_settings.big_blind_bet / 2
+                if game_settings.small_blind_enabled:
+                    game_settings.small_blind_bet = game_settings.big_blind_bet / 2
 
-#             elif game_settings.small_blind_enabled:
-#                 game_settings.small_blind_bet += 2.5
+            elif game_settings.small_blind_enabled:
+                game_settings.small_blind_bet += 2.5
 
-#             print(f"\nBig blind increased to: {game_settings.big_blind_bet}")
-#             print(f"Small blind increased to: {game_settings.small_blind_bet}\n")
+            print(f"\nBig blind increased to: {game_settings.big_blind_bet}")
+            print(f"Small blind increased to: {game_settings.small_blind_bet}\n")

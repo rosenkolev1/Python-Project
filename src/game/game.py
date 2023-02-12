@@ -282,7 +282,7 @@ class Game:
 
                     #Calculate the leftover money for the main(er) pot
                     for main_player in players:
-                        pot.total_money -= main_player.stake
+                        pot.total_money = round(pot.total_money - main_player.stake, 2)
 
                     pot.total_money += len(players) * player_stake
                     
@@ -292,9 +292,9 @@ class Game:
                     #Add the left over players to the side pot and transfer their remaining stakes to the side pot
                     for side_player in side_players:
                         side_pot.players.append(side_player)
-                        side_player.stake -= player_stake
+                        side_player.stake = round(side_player.stake - player_stake, 2)
 
-                    side_pot.total_money = original_pot_total_money - pot.total_money
+                    side_pot.total_money = round(original_pot_total_money - pot.total_money, 2)
                         
                     self.pots.append(side_pot)
                     self.current_pot_index += 1

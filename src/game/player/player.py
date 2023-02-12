@@ -52,15 +52,11 @@ class Player(ABC):
             # Big blind and Small blind during pre-flop counts as a bet
             # Antes do not count as bets
             if pot.current_highest_stake != 0:
-                highest_stake_diff: float = pot.current_highest_stake - stake
+                highest_stake_diff: float = round(pot.current_highest_stake - stake, 2)
 
                 calling_is_all_in = highest_stake_diff >= self.user.money
 
                 call_amount: float = min(highest_stake_diff, self.user.money)   
-
-                #This happens at the start of the new rounds, i.e. when there is no bet to call on
-                # if call_amount < 0:
-                #     call_amount = 0
 
                 minimum_raise_money_needed: float = pot.highest_bet_amount if game.settings.bet_minimum_enabled else call_amount
 

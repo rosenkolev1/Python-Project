@@ -88,9 +88,9 @@ class ChooseActionFactory:
             else:
                 action_type = possible_actions_filtered[random.randint(0, len(possible_actions_filtered) - 1)] 
 
-            min_bet_amount = action_info.pot.highest_bet_amount if action_info.game.settings.bet_minimum_enabled else 1
+            min_bet_amount: float = action_info.pot.highest_bet_amount if action_info.game.settings.bet_minimum_enabled else 1
 
-            amount: float = min(action_info.call_amount + random.randint(min_bet_amount, 50), self.user.money)
+            amount: float = min(action_info.call_amount + (round(random.random() % 50 + min_bet_amount, 2)), self.user.money)
 
             if action_type == PlayerActionType.CALL:
                 amount = action_info.call_amount
@@ -129,7 +129,7 @@ class ChooseActionFactory:
     
             min_bet_amount = action_info.pot.highest_bet_amount if action_info.game.settings.bet_minimum_enabled else 1
 
-            amount: float = min(action_info.call_amount + random.randint(min_bet_amount, 50), self.user.money)
+            amount: float = round(min(action_info.call_amount + (random.random() % 50 + min_bet_amount), self.user.money), 2)
 
             if amount == self.user.money:
                 action_type = PlayerActionType.ALL_IN

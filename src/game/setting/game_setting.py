@@ -144,4 +144,4 @@ class GameSetting:
         if money < required_amount or money <= 0:
             raise InvalidMoneyForSettingsException(
                 "The player that you are trying to add has less money than required to enter the game!\n" + 
-                f"At least {required_amount} is needed to enter the game!")
+                f"At least {required_amount}$ is needed to enter the game!")
