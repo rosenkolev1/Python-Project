@@ -82,7 +82,7 @@ class Game:
             print(GameUI.big_blind_entered_info_prompt(self))
             print()
 
-        if self.settings.enable_minimum_bet and main_pot.highest_bet_amount < self.settings.bet_minimum_amount:
+        if self.settings.bet_minimum_enabled and main_pot.highest_bet_amount < self.settings.bet_minimum_amount:
             #Set the minimum bet for the pot at the initial minimum bet. If the small or big blinds are more than it, then overwrite it!
             main_pot.highest_bet_amount = self.settings.bet_minimum_amount
 
