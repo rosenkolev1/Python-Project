@@ -1,5 +1,6 @@
 from typing import List
 from src.game.player.player import Player
+from src.game.setting.game_setting import GameSetting
 
 class Pot:
 
@@ -10,13 +11,15 @@ class Pot:
         self.current_highest_stake = 0
         self.highest_bet_amount = 0
 
+        self.player_who_opened_pot = None
+
     def get_stake_for_player(self, player: Player):
         if player not in self.players:
             return 0
         
         return player.stake
 
-    def place_bet(self, player: Player, amount: float) -> None:
+    def place_bet(self, player: Player, amount: float, settings: GameSetting) -> None:
         if player not in self.players:
             self.players.append(player)
 
@@ -25,13 +28,29 @@ class Pot:
         player_stake = self.get_stake_for_player(player)
 
         if player_stake > self.current_highest_stake:
+            
+            # If the minimum bet/raise is 20, the call is 10 and a player goes all-in with 20$, then his raise of 10$ over the call
+            # Does not reopen the pot, instead it is treated as a 'call with extra money'
+            # This means that the person who originally raised the bet can not re-raise it again if all others before him call/fold
+            bet_min_amount_to_open: float = self.highest_bet_amount if settings.bet_minimum_enabled else 0  
+            bet_opens_pot: bool = (player_stake > self.current_highest_stake + bet_min_amount_to_open and
+                                   amount >= bet_min_amount_to_open)
 
-            # This check so that the highest bet amount is calculated properly at the start of a new round after the first bet
-            if self.current_highest_stake == 0:
-                self.highest_bet_amount = amount
+            # stake_diff: float = round(self.current_highest_stake - player_stake, 2)
 
-            else:
-                self.highest_bet_amount = round(player_stake - self.current_highest_stake, 2)
+            # bet_opens_pot: bool = amount >= bet_min_amount_to_open
+
+            if bet_opens_pot:
+                # This check is so that the highest bet amount is calculated properly at the start of a new round after the first bet
+                if self.player_who_opened_pot is None:
+                    self.highest_bet_amount = amount
+                
+                # This check is so that the highest bet amount is calculated properly at the start of a new round after 
+                # Somebody goes all-in with an incomplete bet/raise
+                else:
+                    self.highest_bet_amount = round(player_stake - self.current_highest_stake, 2)
+
+                self.player_who_opened_pot = player
 
             self.current_highest_stake = player_stake
 

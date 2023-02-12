@@ -56,12 +56,9 @@ class Game:
         
         main_pot: Pot = Pot()
 
-        #Set the minimum bet for the pot at the initial minimum bet. If the small or big blinds are more than it, then overwrite it!
-        main_pot.highest_bet_amount = 0 if not self.settings.enable_minimum_bet else self.settings.bet_minimum_amount
-
         if self.settings.ante_enabled:
             for player in self.players:
-                main_pot.place_bet(player, self.settings.ante_bet)
+                main_pot.place_bet(player, self.settings.ante_bet, self.settings)
 
                 print(GameUI.ante_entered_info_prompt(player, self.settings.ante_bet))
 
@@ -70,14 +67,24 @@ class Game:
             print()
 
         if self.settings.small_blind_enabled:
-            main_pot.place_bet(self.small_blind_player, self.settings.small_blind_bet)
+            main_pot.place_bet(self.small_blind_player, self.settings.small_blind_bet, self.settings)
             print(GameUI.small_blind_entered_info_prompt(self))
             print()
 
         if self.settings.big_blind_enabled:
-            main_pot.place_bet(self.big_blind_player, self.settings.big_blind_bet)
+            main_pot.place_bet(self.big_blind_player, self.settings.big_blind_bet, self.settings)
+
+            # Set the highest bet manually to the big blind in case we have the small blind enabled as well
+            # Otherwise, 'self.highest_bet_amount = round(player_stake - self.current_highest_stake, 2)'
+            # Gives you the big_blind - small_blind, even tho we want it to give us big_blind
+            main_pot.highest_bet_amount = self.settings.big_blind_bet 
+
             print(GameUI.big_blind_entered_info_prompt(self))
             print()
+
+        if self.settings.enable_minimum_bet and main_pot.highest_bet_amount < self.settings.bet_minimum_amount:
+            #Set the minimum bet for the pot at the initial minimum bet. If the small or big blinds are more than it, then overwrite it!
+            main_pot.highest_bet_amount = self.settings.bet_minimum_amount
 
         # In this case, we put in bets of 0 from all players.
         # Otherwise, as soon as the first player plays something during the round, the round would end 
@@ -86,7 +93,7 @@ class Game:
             and not self.settings.ante_enabled):
 
             for player in self.players:
-                main_pot.place_bet(player, 0)
+                main_pot.place_bet(player, 0, self.settings)
 
         self.pots.append(main_pot)
         self.current_pot_index = 0
@@ -265,7 +272,6 @@ class Game:
             else:
                 self.payout_winner(pot, players_not_folded)
             
-
     def split_current_pot(self) -> None:
         #Order the players in the pot by their stakes
         self.current_pot.players.sort(key=lambda p: p.stake)
@@ -304,12 +310,16 @@ class Game:
     def start_round(self): 
         print(GameUI.round_starting_info_prompt(self))
 
+        # Set the player_who_opened_pot to None, regardless of the round
+        # Otherwise, the big_blind player cannot raise the big_blind if all others before him call
+        self.current_pot.player_who_opened_pot = None
+
         #Set the current highest stake for the current pot for this round to 0 to reset it
-        #Also set the highest bet back down to 0
+        #Also set the highest bet back down to 0 to reset it   
         if (self.round != GameRound.Pre_Flop):
             self.current_pot.current_highest_stake = 0
-            self.current_pot.highest_bet_amount = self.settings.bet_minimum_amount            
-
+            self.current_pot.highest_bet_amount = self.settings.bet_minimum_amount
+                    
         #Reset the has_played_turn status for all the players who have not folded and are not all-in
         for player in self.current_pot.get_players_not_folded_and_not_all_in():
             player.has_played_turn = False
@@ -377,10 +387,18 @@ class Game:
         #Determine the possible actions
         possible_actions, choose_action_info = player.get_possible_actions(pot, self)
 
-        action: PlayerAction = player.choose_action(possible_actions, choose_action_info)
+        action: PlayerAction = None
+
+        if self.current_player != pot.player_who_opened_pot:
+            action = player.choose_action(possible_actions, choose_action_info)
+
+        else:
+            # This is done only when an incomplete all-in bet circles back around to the use who bet last before the all-in bet
+            action = PlayerAction(PlayerActionType.CALL, choose_action_info.call_amount)
 
         is_all_in: bool = action.type == PlayerActionType.ALL_IN
-        is_all_in_and_raise: bool = is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake
+
+        is_all_in_and_raise: bool = (is_all_in and pot.get_stake_for_player(player) + action.amount > pot.current_highest_stake)
 
         if action.type == PlayerActionType.FOLD:
             player.has_folded = True
@@ -391,8 +409,8 @@ class Game:
                     other_player.has_played_turn = False
 
         if action.type != PlayerActionType.FOLD and action.type != PlayerActionType.CHECK:
-            pot.place_bet(player, action.amount)
-            
+            pot.place_bet(player, action.amount, self.settings)
+
             #In this case, we are not all-in
             if not is_all_in:
                 if action.type == PlayerActionType.RAISE:
@@ -418,6 +436,10 @@ class Game:
             return True
 
         self.next_turn()
+
+        # If the next person to play is the person who opened the pot, then the pot has been closed by everyone, so we proceed
+        # to the next round
+
         return False
 
     def next_round(self):

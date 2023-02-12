@@ -48,7 +48,7 @@ class Player(ABC):
             possible_actions.append(PlayerActionType.FOLD)
             stake = pot.get_stake_for_player(self)
 
-            #In this case, there has been a bet this round already 
+            # In this case, there has been a bet this round already 
             # Big blind and Small blind during pre-flop counts as a bet
             # Antes do not count as bets
             if pot.current_highest_stake != 0:
@@ -58,12 +58,22 @@ class Player(ABC):
 
                 call_amount: float = min(highest_stake_diff, self.user.money)   
 
-                minimum_raise_money_needed: float = pot.highest_bet_amount if game.settings.bet_minimum_enabled else call_amount
+                minimum_raise_money_needed: float = (
+                    call_amount + pot.highest_bet_amount if game.settings.bet_minimum_enabled else call_amount)
 
                 can_raise_regardless_of_minimum: bool = (not calling_is_all_in
                             and any(map(lambda x: x != self and not x.is_all_in, pot.get_players_not_folded())))
 
-                can_raise: bool = can_raise_regardless_of_minimum and self.user.money >= minimum_raise_money_needed
+                # can_raise: bool = (
+                #     can_raise_regardless_of_minimum and 
+                #     self.user.money >= minimum_raise_money_needed and
+                #     pot.player_who_opened_pot != self
+                # )
+
+                can_raise: bool = (
+                    can_raise_regardless_of_minimum and 
+                    self.user.money >= minimum_raise_money_needed
+                )
 
                 if call_amount > 0 and not calling_is_all_in:
                     possible_actions.append(PlayerActionType.CALL)
