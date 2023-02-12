@@ -40,12 +40,6 @@ class Game:
 
         self.pots.clear()
 
-        if self.is_two_player_game and self.table is None:
-            if self.settings.small_blind_enabled:
-                self.settings.small_blind_holder = 0
-            if self.settings.big_blind_enabled:
-                self.settings.big_blind_holder = 1
-
         print(GameUI.dealer_info_prompt(self))
 
         if self.settings.small_blind_enabled:
@@ -98,10 +92,9 @@ class Game:
         print(GameUI.GAME_ENDING_INFO_PROMPT)
         
     def add_player(self, player: Player) -> None:
-        self.settings._validate_money_for_game_settings(player.user.money)
+        self.settings.validate_money_for_game_settings(player.user.money)
 
         self.players.append(player)
-        self.two_player_game = len(self.players) == 2
 
     def pot_number(self, pot: Pot) -> int:
         return self.pots.index(pot) + 1

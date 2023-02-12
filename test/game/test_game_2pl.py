@@ -52,7 +52,12 @@ def test_2_players_always_raise_one_or_both_all_in(user_first: User, user_second
             Card(Rank.SEVEN, Suit.DIAMONDS)
         ])
 
-    game_first = Game(default_game_settings(preset_deck))
+    game_settings: GameSetting = default_game_settings(preset_deck)
+
+    game_settings.set_small_blind_holder(0)
+    game_settings.set_big_blind_holder(1)
+
+    game_first = Game(game_settings)
     game_first.add_player(player_first)
     game_first.add_player(player_second)
 

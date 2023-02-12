@@ -79,7 +79,7 @@ class GameSetting:
         self.hand_visibility_setting = setting
         return self
 
-    def _validate_money_for_game_settings(self, money: float) -> None:
+    def validate_money_for_game_settings(self, money: float) -> None:
         required_amount = 0
 
         if self.big_blind_enabled:
