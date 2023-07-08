@@ -1,4 +1,40 @@
+## This is an app/API for making poker games.
+
+1) You can create a poker game with variable parameters as you see fit, such as setting the small/big blind amounts or disabling one or both of them. You can offset between the button (dealer) and the small/big blind holders, you can set variable antes, you can determine the amount of players, you can add bot players with various AI, such as a pre-determined bot, which attempts to play all of it's hands with predefined actions, provided that these actions are valid and etc...
+
+2) The game supports handling of an arbitrary number of side-pots. For example, when three players are playing, one of them goes all-in, and the other 2 call, but are not all-in, then a side pot is created, where all 3 people play with the all-in amount, and the other 2 players who are not all in play in a separate pot against each other. This way, the all-in player cannot win more than the have bargained.
+
+3) There is UI functionality for printing the state of the game to the console/ to a file. For example, in the main file, I have written a poker tournament with the small/big blinds enabled and their amounts increase at a certain rate (after x number of rounds) and the players (bots) play on until only 1 is left and he wins the game. All the tournament games/results are written to a file.
+
+4) There is also functionality for adding a human player to the game, who is free to do whatever they like. That being said, if there are multiple human players, then all their hands will be shown on the console, so only 1 human player is recommended. The human player decides via commands what to do on a given turn. Of course, they cannot do anything illegal.
+
+5) There are various, although not exhaustive, unit tests. I mostly tested the trickier things. For example, I tested whether or not the game could recognize a low-ace straight (ace, two, three, four, five) and whether during straight tie-breaks the game correctly evaluates that the highest card of a low-ace straight is actually the five and not the ace.
+
+## Example functionality, hosting a tournament and writing the results to a file.
+
+-- Tournament begins
+![image](https://github.com/rosenkolev1/Python-Project/assets/50500415/fa12eb3d-177b-4d74-a4c7-38e54ac2f12e)
+
+![image](https://github.com/rosenkolev1/Python-Project/assets/50500415/05d946b6-ad26-41f4-adf0-66c4581c0444)
+
+![image](https://github.com/rosenkolev1/Python-Project/assets/50500415/59d2a743-90f2-4416-8bbd-9e3d3f60bf66)
+
+-- Showdown
+![image](https://github.com/rosenkolev1/Python-Project/assets/50500415/ace1d0ac-91e2-41f8-8fa8-dfbaaa3c3b77)
+
+-- Player eliminated, blinds increased
+![image](https://github.com/rosenkolev1/Python-Project/assets/50500415/43762fb6-5dae-4937-b2e1-a8068cb766e5)
+
+-- Multiple pots
+![image](https://github.com/rosenkolev1/Python-Project/assets/50500415/836df6ca-2548-4677-8753-37f0ac51d513)
+
+-- End of tournament
+![image](https://github.com/rosenkolev1/Python-Project/assets/50500415/5f661704-7a35-457b-a7b7-72324ef732e2)
+
+
 ## To run the app, you are going to have to create a virtual environment and download all the necessary requirement from the requirement.txt
+
+## Detailed explanation of the classes and functionality
 
 I followed the steps at bottom of https://github.com/fmipython/PythonCourse2022/blob/main/13%20-%20Modules/13%20-%20Modules.ipynb
 For setting up the VENV.
